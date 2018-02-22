@@ -30,6 +30,7 @@ class MetadataClassIterator(metadataClass: MetadataClass): Iterator<MetadataToke
     private fun pushMetadataListPropertiesIfExist(metadataList: MetadataList) {
         stack.push(ListEnd)
         when(metadataList.containsType) {
+            is MetadataPrimitive -> stack.push(PrimitiveToken(metadataList.containsType))
             is MetadataList -> pushMetadataListPropertiesIfExist(metadataList.containsType)
             is MetadataClass -> propertiesToTokens(metadataList.containsType).forEach(stack::push)
         }

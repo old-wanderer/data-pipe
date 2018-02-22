@@ -68,4 +68,19 @@ class MetadataClassIteratorTest {
         }
     }
 
+    @Test
+    fun withListOfPrimitiveTest() {
+        val p0 = PropertyMetadata("p0", PrimitiveLong)
+        val p3 = PropertyMetadata("p3", MetadataList(PrimitiveString))
+        val expectedTokens = mutableListOf(
+                ObjectBegin, PropertyToken(p0), PropertyToken(p3),
+                ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
+                ObjectEnd)
+        val model = MetadataClass(setOf(p0, p3))
+
+        for ((index, token) in model.propertyIterator().withIndex()) {
+            Assertions.assertEquals(expectedTokens[index], token) { "index: $index" }
+        }
+    }
+
 }

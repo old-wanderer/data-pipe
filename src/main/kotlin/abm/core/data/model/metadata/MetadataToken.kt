@@ -6,6 +6,7 @@ package abm.core.data.model.metadata
  */
 sealed class MetadataToken
 data class PropertyToken(val prop: PropertyMetadata): MetadataToken()
+data class PrimitiveToken(val type: MetadataPrimitive): MetadataToken()
 object ObjectBegin: MetadataToken()
 object ObjectEnd: MetadataToken()
 object ListBegin: MetadataToken()
