@@ -83,4 +83,34 @@ class BuildMetadataFormAstTest {
         Assertions.assertEquals(expected, buildMetadata(buildMetadataAstTree(tokens)))
     }
 
+    @Test
+    fun bigCase1() {
+        val model = metadataClass {
+            + PrimitiveLong
+            + PrimitiveString
+            + PrimitiveDouble
+            + metadataList(PrimitiveString)
+            + metadataList(PrimitiveBoolean)
+            + metadataClass {
+                + PrimitiveString
+                + PrimitiveString
+            }
+            + metadataClass {
+                + PrimitiveBoolean
+                + PrimitiveDouble
+                + metadataClass {
+                    + PrimitiveString
+                    + PrimitiveString
+                }
+            }
+            + PrimitiveString
+            + metadataList(metadataClass {
+                + PrimitiveString
+                + PrimitiveString
+            })
+        }
+
+        Assertions.assertEquals(model, buildMetadata(buildMetadataAstTree(metadataTokens(model).toList())))
+    }
+
 }

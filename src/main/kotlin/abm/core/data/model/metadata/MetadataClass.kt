@@ -37,8 +37,6 @@ class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadat
         }
     }
 
-    fun propertyIterator(): Iterator<MetadataToken> = MetadataClassIterator(this)
-
     override fun equals(other: Any?) = other is MetadataClass && properties == other.properties
 
     override fun hashCode() = properties.hashCode()
