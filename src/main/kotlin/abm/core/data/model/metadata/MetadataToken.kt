@@ -72,7 +72,7 @@ class MetadataPropertyNode(val name: String, parent: MetadataAstNode): MetadataA
     }
 }
 
-
+// ---------------------------------------------------------------------------------
 
 fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
     val root = RootNode()
@@ -135,4 +135,14 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
     }
 
     return root
+}
+
+fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
+    is RootNode -> buildMetadata(node.child)
+    is MetadataClassNode -> MetadataClass(node.children.map { buildMetadata(it) as PropertyMetadata }.toSet())
+    is MetadataListNode  -> MetadataList(buildMetadata(node.containedType))
+    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type))
+    is MetadataPrimitiveNode -> node.type
+
+    else -> throw RuntimeException("can't process $node")
 }
