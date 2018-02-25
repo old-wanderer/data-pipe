@@ -11,7 +11,7 @@ import kotlin.coroutines.experimental.buildSequence
 fun metadataTokens(metadataClass: MetadataClass): Sequence<MetadataToken> = buildSequence {
     yield(ObjectBegin)
     for (property in metadataClass.properties) {
-        yield(PropertyNameToken(property.name))
+        yield(PropertyNameToken(property.name, property.aliasNames))
         when (property.type) {
             is MetadataPrimitive -> yield(PrimitiveToken(property.type))
             is MetadataClass -> yieldAll(metadataTokens(property.type))

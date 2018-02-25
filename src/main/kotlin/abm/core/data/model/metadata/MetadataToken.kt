@@ -8,7 +8,7 @@ sealed class MetadataToken
 data class PropertyToken(val prop: PropertyMetadata): MetadataToken()
 data class PrimitiveToken(val type: MetadataPrimitive): MetadataToken()
 
-data class PropertyNameToken(val name: String): MetadataToken()
+data class PropertyNameToken(val name: String, val aliases: Set<String> = emptySet()): MetadataToken()
 //data class TypeToken(val type: Metadata): MetadataToken()
 
 
@@ -63,7 +63,9 @@ data class MetadataPrimitiveNode(val type: MetadataPrimitive): MetadataAstNode()
     }
 }
 
-class MetadataPropertyNode(val name: String, parent: MetadataAstNode): MetadataAstNode(parent) {
+class MetadataPropertyNode(val name: String,
+                           parent: MetadataAstNode,
+                           val aliases: Set<String> = setOf()) : MetadataAstNode(parent) {
 
     lateinit var type: MetadataAstNode
 
@@ -96,7 +98,7 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
 
             is PropertyNameToken -> {
                 if (current is MetadataClassNode) {
-                    MetadataPropertyNode(token.name, current)
+                    MetadataPropertyNode(token.name, current, token.aliases)
                 } else {
                     throw RuntimeException("can't attach PropertyNameNode")
                 }
@@ -141,7 +143,7 @@ fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
     is RootNode -> buildMetadata(node.child)
     is MetadataClassNode -> MetadataClass(node.children.map { buildMetadata(it) as PropertyMetadata }.toSet())
     is MetadataListNode  -> MetadataList(buildMetadata(node.containedType))
-    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type))
+    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type), node.aliases)
     is MetadataPrimitiveNode -> node.type
 
     else -> throw RuntimeException("can't process $node")

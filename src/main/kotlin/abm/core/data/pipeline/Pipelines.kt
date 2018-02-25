@@ -32,21 +32,17 @@ object Pipelines {
 
                 fun String.isBadName() = this[0] == '/'
                 fun String.correctBadName() = this.substring(1)
-                fun MetadataClass.processProperties(): Set<PropertyMetadata> {
-                    fun Metadata.processIfMetadataClass(): Metadata =  if (this is MetadataClass)
-                        MetadataClass(this.processProperties()) else this
-                    return this.properties.map {
-                        if (it.name.isBadName()) {
-                            PropertyMetadata(it.name.correctBadName(),
-                                    it.type.processIfMetadataClass(), it.aliasNames + it.name)
-                        } else {
-                            PropertyMetadata(it.name, it.type.processIfMetadataClass())
-                        }
-                    }.toSet()
-                }
 
                 if (source is MetadataClass) {
-                    MetadataClass(source.processProperties())
+
+                    buildMetadata(buildMetadataAstTree(metadataTokens(source).map { token ->
+                        if (token is PropertyNameToken) {
+                            if (token.name.isBadName()) {
+                                return@map PropertyNameToken(token.name.correctBadName(), token.aliases + token.name)
+                            }
+                        }
+                        token
+                    }.toList()))
                 } else {
                     source!!
                 }
