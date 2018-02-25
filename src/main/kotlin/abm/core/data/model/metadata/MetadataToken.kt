@@ -20,53 +20,41 @@ abstract class MetadataAstNode(val parent: MetadataAstNode? = null) {
         parent?.addChild(this)
     }
 
-    abstract fun addChild(child: MetadataAstNode)
+    val children = mutableSetOf<MetadataAstNode>()
+
+    @Deprecated("use children.add(child)")
+    fun addChild(child: MetadataAstNode) {
+        children.add(child)
+    }
 
 }
 
 class RootNode: MetadataAstNode() {
 
-    lateinit var child: MetadataAstNode
-
-    override fun addChild(child: MetadataAstNode) {
-        this.child = child
-    }
+    val child: MetadataAstNode?
+        get() = children.firstOrNull()
 }
 
 class MetadataClassNode(parent: MetadataAstNode): MetadataAstNode(parent) {
 
-    val children: MutableSet<MetadataPropertyNode> = mutableSetOf()
-
-    override fun addChild(child: MetadataAstNode) {
-        children.add(child as MetadataPropertyNode)
-    }
+    val properties: Set<MetadataPropertyNode>
+        get() = children as Set<MetadataPropertyNode>
 }
 
 class MetadataListNode(parent: MetadataAstNode): MetadataAstNode(parent) {
 
-    lateinit var containedType: MetadataAstNode
-
-    override fun addChild(child: MetadataAstNode) {
-        containedType = child
-    }
+    val containedType: MetadataAstNode?
+        get() = children.firstOrNull()
 }
 
-data class MetadataPrimitiveNode(val type: MetadataPrimitive): MetadataAstNode() {
-
-    override fun addChild(child: MetadataAstNode) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
+data class MetadataPrimitiveNode(val type: MetadataPrimitive): MetadataAstNode()
 
 class MetadataPropertyNode(val name: String,
                            parent: MetadataAstNode,
                            val aliases: Set<String> = setOf()) : MetadataAstNode(parent) {
 
-    lateinit var type: MetadataAstNode
-
-    override fun addChild(child: MetadataAstNode) {
-        type = child
-    }
+    val type: MetadataAstNode?
+        get() = children.firstOrNull()
 }
 
 // ---------------------------------------------------------------------------------
@@ -133,10 +121,10 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
 }
 
 fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
-    is RootNode -> buildMetadata(node.child)
-    is MetadataClassNode -> MetadataClass(node.children.map { buildMetadata(it) as PropertyMetadata }.toSet())
-    is MetadataListNode  -> MetadataList(buildMetadata(node.containedType))
-    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type), node.aliases)
+    is RootNode -> buildMetadata(node.child!!)
+    is MetadataClassNode -> MetadataClass(node.properties.map { buildMetadata(it) as PropertyMetadata }.toSet())
+    is MetadataListNode  -> MetadataList(buildMetadata(node.containedType!!))
+    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type!!), node.aliases)
     is MetadataPrimitiveNode -> node.type
 
     else -> throw RuntimeException("can't process $node")

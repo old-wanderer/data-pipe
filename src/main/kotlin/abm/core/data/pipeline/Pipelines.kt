@@ -8,7 +8,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import java.io.BufferedReader
 import java.io.FileReader
-import java.util.*
 import java.util.stream.Collectors
 
 /**
@@ -51,21 +50,26 @@ object Pipelines {
             PipelineElement {
                 if (it is MetadataClass) {
                     val ast = buildMetadataAstTree(metadataTokens(it).toList())
-
+                    dfsMetadataAst(ast)
+                    return@PipelineElement buildMetadata(ast)
                 }
-//                if (it is MetadataClass) {
-//                    val props = it.properties.filterNot(::unnecessaryPropertiesPredicate)
-//                    if (props != it.properties)
-//                        return@PipelineElement MetadataClass(props.toSet())
-//                }
                 it!!
             }
 
-    private fun unnecessaryPropertiesPredicate(value: Metadata): Boolean = when (value) {
-        is PropertyMetadata -> unnecessaryPropertiesPredicate(value.type)
-        is MetadataClass -> value.properties.isEmpty()
-        is MetadataList -> unnecessaryPropertiesPredicate(value.containsType)
-        PrimitiveNull -> true
+    private fun dfsMetadataAst(node: MetadataAstNode) {
+        node.children.removeIf {
+            dfsMetadataAst(it)
+            unnecessaryPropertiesPredicateNode(it)
+        }
+    }
+
+    private fun unnecessaryPropertiesPredicateNode(node: MetadataAstNode): Boolean = when (node) {
+        is MetadataPropertyNode -> node.type == null
+        is MetadataListNode -> node.containedType == null
+
+        is MetadataClassNode -> node.properties.isEmpty()
+        is MetadataPrimitiveNode -> node.type == PrimitiveNull
+
         else -> false
     }
 

@@ -28,9 +28,9 @@ class MetadataAstBuildTest {
         Assertions.assertTrue((current as RootNode).child is MetadataClassNode)
 
         current = current.child as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataPrimitiveNode)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
@@ -51,9 +51,9 @@ class MetadataAstBuildTest {
         Assertions.assertTrue((current as RootNode).child is MetadataClassNode)
 
         current = current.child as MetadataClassNode
-        Assertions.assertEquals(2, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataPrimitiveNode)
-        current = current.children.first()
+        Assertions.assertEquals(2, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
@@ -73,14 +73,14 @@ class MetadataAstBuildTest {
         Assertions.assertTrue((current as RootNode).child is MetadataClassNode)
 
         current = current.child as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataClassNode)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataClassNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         current = current.type as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataPrimitiveNode)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
@@ -100,9 +100,9 @@ class MetadataAstBuildTest {
         Assertions.assertTrue((current as RootNode).child is MetadataClassNode)
 
         current = current.child as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataListNode)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataListNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         current = current.type as MetadataListNode
         Assertions.assertTrue(current.containedType is MetadataPrimitiveNode)
@@ -125,15 +125,15 @@ class MetadataAstBuildTest {
         Assertions.assertTrue((current as RootNode).child is MetadataClassNode)
 
         current = current.child as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        Assertions.assertTrue(current.children.first().type is MetadataListNode)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        Assertions.assertTrue(current.properties.first().type is MetadataListNode)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         current = current.type as MetadataListNode
         Assertions.assertTrue(current.containedType is MetadataClassNode)
         current = current.containedType as MetadataClassNode
-        Assertions.assertEquals(1, current.children.size)
-        current = current.children.first()
+        Assertions.assertEquals(1, current.properties.size)
+        current = current.properties.first()
         Assertions.assertEquals("p0", current.name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
