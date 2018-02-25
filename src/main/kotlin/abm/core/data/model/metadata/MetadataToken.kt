@@ -5,13 +5,8 @@ package abm.core.data.model.metadata
  * @since: 22.02.2018
  */
 sealed class MetadataToken
-data class PropertyToken(val prop: PropertyMetadata): MetadataToken()
 data class PrimitiveToken(val type: MetadataPrimitive): MetadataToken()
-
 data class PropertyNameToken(val name: String, val aliases: Set<String> = emptySet()): MetadataToken()
-//data class TypeToken(val type: Metadata): MetadataToken()
-
-
 object ObjectBegin: MetadataToken()
 object ObjectEnd: MetadataToken()
 object ListBegin: MetadataToken()
@@ -131,8 +126,6 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
                     throw RuntimeException("expected type MetadataListNode")
                 }
             }
-
-            else -> throw RuntimeException("can't process token $token")
         }
     }
 

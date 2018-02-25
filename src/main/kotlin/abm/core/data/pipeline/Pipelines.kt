@@ -34,7 +34,6 @@ object Pipelines {
                 fun String.correctBadName() = this.substring(1)
 
                 if (source is MetadataClass) {
-
                     buildMetadata(buildMetadataAstTree(metadataTokens(source).map { token ->
                         if (token is PropertyNameToken) {
                             if (token.name.isBadName()) {
