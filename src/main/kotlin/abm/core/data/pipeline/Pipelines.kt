@@ -47,6 +47,27 @@ object Pipelines {
                 }
             }
 
+    fun removeUnnecessaryProperties(): PipelineElement<Metadata, Metadata> =
+            PipelineElement {
+                if (it is MetadataClass) {
+                    val ast = buildMetadataAstTree(metadataTokens(it).toList())
+
+                }
+//                if (it is MetadataClass) {
+//                    val props = it.properties.filterNot(::unnecessaryPropertiesPredicate)
+//                    if (props != it.properties)
+//                        return@PipelineElement MetadataClass(props.toSet())
+//                }
+                it!!
+            }
+
+    private fun unnecessaryPropertiesPredicate(value: Metadata): Boolean = when (value) {
+        is PropertyMetadata -> unnecessaryPropertiesPredicate(value.type)
+        is MetadataClass -> value.properties.isEmpty()
+        is MetadataList -> unnecessaryPropertiesPredicate(value.containsType)
+        PrimitiveNull -> true
+        else -> false
+    }
 
     fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
         PipelineElement({

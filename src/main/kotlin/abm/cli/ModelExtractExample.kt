@@ -20,56 +20,10 @@ const val EVENTS_DATA = "${DATA_PREFIX}events.json"
 const val POST_HISTORY_DATA = "${DATA_PREFIX}post_history.json"
 const val POSTS_DATA = "${DATA_PREFIX}posts.json"
 
-// TODO рекурсивная проверка
-fun removeUnnecessaryProperties(): PipelineElement<Metadata, Metadata> =
-        PipelineElement {
-            if (it is MetadataClass) {
-                val props = it.properties.filterNot(::unnecessaryPropertiesPredicate)
-                if (props != it.properties)
-                    return@PipelineElement MetadataClass(props.toSet())
-            }
-            it!!
-        }
-
-enum class RelationshipType { NONE, ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY }
-
-typealias DataRepository2 = Pair<DataRepository, DataRepository>
-
-fun analyzePropertyRelationship(propLeft: String, propRight: String = propLeft):
-        PipelineWithResult<DataRepository2, RelationshipType> =
-        PipelineWithResult { param  ->
-            val (left, right) = param!!
-
-            val a = DataRepository.analyzePropertyRelationship(left, right, propLeft, propRight)
-            val b = DataRepository.analyzePropertyRelationship(right, left, propRight, propLeft)
-
-            println(a)
-            println(b)
-
-            if (a.third != b.third) {
-                println("WARNING: something wrong")
-                return@PipelineWithResult RelationshipType.NONE
-            }
-            return@PipelineWithResult when {
-                a.second == 1 && b.second == 1 -> RelationshipType.ONE_TO_ONE
-                a.second == 1 && b.second > 1 -> RelationshipType.MANY_TO_ONE
-                a.second > 1 && b.second == 1 -> RelationshipType.ONE_TO_MANY
-                a.second > 1 && b.second > 1 -> RelationshipType.MANY_TO_MANY
-                else -> RelationshipType.NONE
-            }
-        }
-
-fun unnecessaryPropertiesPredicate(value: Metadata): Boolean = when (value) {
-    is PropertyMetadata -> unnecessaryPropertiesPredicate(value.type)
-    is MetadataClass -> value.properties.isEmpty()
-    is MetadataList -> unnecessaryPropertiesPredicate(value.containsType)
-    PrimitiveNull -> true
-    else -> false
-}
 
 fun scenario1(path: String) =
         (Pipelines.extractModelFrom(path, 10)
-        + removeUnnecessaryProperties()
+        + Pipelines.removeUnnecessaryProperties()
         + Pipelines.aliasForBadNames()
         + Pipelines.process(System.out::println)
         + Pipelines.generateClass()
