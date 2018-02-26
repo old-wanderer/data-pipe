@@ -13,7 +13,15 @@ abstract class Metadata {
 
 }
 
-class MetadataList(val containsType: Metadata): Metadata() {
+abstract class MetadataType: Metadata() {
+
+    infix fun combine(other: MetadataType): MetadataType = (this combine other as Metadata) as MetadataType
+
+}
+
+// ----------------------------------------------------------------------
+
+class MetadataList(val containsType: MetadataType): MetadataType() {
 
     override fun combine(other: Metadata): MetadataList = when(other) {
         is MetadataList  -> MetadataList(containsType combine other.containsType)
@@ -31,7 +39,7 @@ class MetadataList(val containsType: Metadata): Metadata() {
     override fun toString() = prettyString()
 }
 
-sealed class MetadataPrimitive: Metadata() {
+sealed class MetadataPrimitive: MetadataType() {
 
     override fun combine(other: Metadata): Metadata = when {
         this == other -> this

@@ -9,17 +9,17 @@ class MetadataClassBuilder {
 
     private val properties = mutableSetOf<PropertyMetadata>()
 
-    operator fun Metadata.unaryPlus() {
+    operator fun MetadataType.unaryPlus() {
         properties.add(PropertyMetadata("p${properties.size}", this))
     }
 
     @JvmName("addProperty")
-    operator fun Pair<String, Metadata>.unaryPlus() {
+    operator fun Pair<String, MetadataType>.unaryPlus() {
         properties.add(PropertyMetadata(this.first, this.second))
     }
 
     @JvmName("addPropertyWithAlias")
-    operator fun Pair<List<String>, Metadata>.unaryPlus() {
+    operator fun Pair<List<String>, MetadataType>.unaryPlus() {
         properties.add(PropertyMetadata(this.first.first(), this.second, this.first.drop(1).toSet()))
     }
 
@@ -36,4 +36,4 @@ fun metadataClass(init: MetadataClassBuilder.() -> Unit): MetadataClass {
     return clazz.build()
 }
 
-fun metadataList(containsType: Metadata = PrimitiveNull) = MetadataList(containsType)
+fun metadataList(containsType: MetadataType = PrimitiveNull) = MetadataList(containsType)

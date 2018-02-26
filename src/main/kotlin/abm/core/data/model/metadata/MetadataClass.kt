@@ -4,7 +4,7 @@ package abm.core.data.model.metadata
  * @author: Andrei Shlykov
  * @since: 31.01.2018
  */
-class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadata() {
+class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): MetadataType() {
 
     override fun combine(other: Metadata): Metadata = when(other) {
         is MetadataClass -> {
@@ -45,7 +45,7 @@ class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadat
 }
 
 data class PropertyMetadata(val name: String,
-                            val type: Metadata,
+                            val type: MetadataType,
                             val aliasNames: Set<String> = emptySet()): Metadata() {
 
     override fun combine(other: Metadata): PropertyMetadata = when (other) {

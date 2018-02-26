@@ -8,7 +8,7 @@ import com.google.gson.JsonElement
  */
 // todo перенести сюда все утильные методы
 
-fun constructMetadataFromJson(jsonElement: JsonElement): Metadata = when {
+fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
     jsonElement.isJsonObject -> {
         val properties = mutableSetOf<PropertyMetadata>()
         for ((key, value) in jsonElement.asJsonObject.entrySet()) {
@@ -17,7 +17,7 @@ fun constructMetadataFromJson(jsonElement: JsonElement): Metadata = when {
         MetadataClass(properties)
     }
     jsonElement.isJsonArray -> {
-        var containedType: Metadata = PrimitiveNull
+        var containedType: MetadataType = PrimitiveNull
         for (value in jsonElement.asJsonArray) {
             containedType = containedType combine constructMetadataFromJson(value)
         }
