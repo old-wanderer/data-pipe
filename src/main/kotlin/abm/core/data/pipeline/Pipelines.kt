@@ -106,7 +106,9 @@ object Pipelines {
         }
         stream
                 .map { constructMetadataFromJson(parser.parse(it)) }
-                .reduce(PrimitiveNull, Metadata::combine)
+                // TODO раньше работало .reduce(PrimitiveNull, Metadata::combine)
+                // надо понять как MetadataType::combine все сломал
+                .reduce(PrimitiveNull) { acc, met -> acc combine met}
     })
 
 }
