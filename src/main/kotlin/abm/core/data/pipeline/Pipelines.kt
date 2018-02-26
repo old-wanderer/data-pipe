@@ -4,7 +4,6 @@ import abm.core.data.generator.ClassGenerator
 import abm.core.data.handler.DataRepository
 import abm.core.data.model.metadata.*
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import java.io.BufferedReader
 import java.io.FileReader
@@ -109,32 +108,5 @@ object Pipelines {
                 .map { constructMetadataFromJson(parser.parse(it)) }
                 .reduce(PrimitiveNull, Metadata::combine)
     })
-
-    private fun constructMetadataFromJson(jsonElement: JsonElement): Metadata = when {
-        jsonElement.isJsonObject -> {
-            val properties = mutableSetOf<PropertyMetadata>()
-            for ((key, value) in jsonElement.asJsonObject.entrySet()) {
-                properties.add(PropertyMetadata(key, constructMetadataFromJson(value)))
-            }
-            MetadataClass(properties)
-        }
-        jsonElement.isJsonArray -> {
-            var containedType: Metadata = PrimitiveNull
-            for (value in jsonElement.asJsonArray) {
-                containedType = containedType combine constructMetadataFromJson(value)
-            }
-            MetadataList(containedType)
-        }
-        jsonElement.isJsonPrimitive -> {
-            val jsonPrimitive = jsonElement.asJsonPrimitive
-            when {
-                jsonPrimitive.isNumber -> PrimitiveDouble
-                jsonPrimitive.isBoolean -> PrimitiveBoolean
-                else -> PrimitiveString
-            }
-        }
-        jsonElement.isJsonNull -> PrimitiveNull
-        else -> PrimitiveNull
-    }
 
 }

@@ -1,9 +1,8 @@
-package abm.core.data.model
+package abm.core.data.model.metadata
 
-import abm.core.data.model.metadata.*
+import com.google.gson.JsonParser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -12,10 +11,12 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.util.stream.Stream
 
 /**
- * @author: andrei shlykov
- * @since: 20.01.2018
+ * @author: Andrei Shlykov
+ * @since: 27.02.2018
  */
-class DataModelTest {
+class ConstructMetadataFromJsonTest {
+
+    private val parser = JsonParser()
 
     companion object {
         @JvmStatic
@@ -41,13 +42,16 @@ class DataModelTest {
     // тест объеденения двух моделей
     @ParameterizedTest
     @MethodSource("generalizeTestArguments")
-    fun generalizeTest(json0: String, json1: String, expected: Metadata) {
-        val model = DataModel()
+    fun combineTest(json0: String, json1: String, expected: Metadata) {
 
-        model.generalize(json0)
-        model.generalize(json1)
+        val jsonElem0 = parser.parse(json0)
+        val jsonElem1 = parser.parse(json1)
 
-        Assertions.assertEquals(expected, model.metadata)
+        val metadata0 = constructMetadataFromJson(jsonElem0)
+        val metadata1 = constructMetadataFromJson(jsonElem1)
+        val result = metadata0 combine metadata1
+
+        Assertions.assertEquals(expected, result)
     }
 
 
@@ -58,9 +62,8 @@ class DataModelTest {
             "{\"p0\": [[\"tests\"], [\"amazing\"]]}" to metadataClass { +metadataList(metadataList(PrimitiveString)) }
     ).mapIndexed { index, (input, expected) ->
         DynamicTest.dynamicTest("extractModelTest. Data index: $index") {
-            val model = DataModel()
-            model.generalize(input)
-            Assertions.assertEquals(expected, model.metadata)
+            val metadata = constructMetadataFromJson(parser.parse(input))
+            Assertions.assertEquals(expected, metadata)
         }
     }
 
@@ -82,46 +85,11 @@ class DataModelTest {
         """[[{}]]""",
         """[[{ "b": 42 }]]"""
     ])
-    fun generalizeWithSameObjectTest(json: String) {
-        val model = DataModel()
+    fun combineWithSameObjectTest(json: String) {
+        val metadata0 = constructMetadataFromJson(parser.parse(json))
+        val metadata1 = constructMetadataFromJson(parser.parse(json))
 
-        val metadata0 = model.generalize(json)
-        val metadata1 = model.generalize(json)
-
-        Assertions.assertEquals(metadata0, PrimitiveNull)
-        Assertions.assertEquals(metadata1, model.metadata)
+        Assertions.assertEquals(metadata1, metadata0 combine metadata1)
     }
-
-//    @Test
-//    fun getPropertyByValidPathTest() {
-//        val model = DataModel()
-//        model.metadata = metadataClass {
-//            + metadataClass {
-//                + metadataClass {
-//                    + metadataClass {
-//                        + PrimitiveLong
-//                    }
-//                }
-//            }
-//        }
-//
-//        Assertions.assertEquals(PrimitiveLong, model.getMetadataByPath("p0.p0.p0.p0"))
-//    }
-//
-//    @Test
-//    fun getPropertyByInvalidPathTest() {
-//        val model = DataModel()
-//        model.metadata = metadataClass {
-//            + metadataClass {
-//                + metadataClass {
-//                    + metadataClass {
-//                        + PrimitiveLong
-//                    }
-//                }
-//            }
-//        }
-//
-//        Assertions.assertThrows(RuntimeException::class.java) { model.getMetadataByPath("p0.p0.p0.p1") }
-//    }
 
 }
