@@ -34,3 +34,12 @@ fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
     jsonElement.isJsonNull -> PrimitiveNull
     else -> PrimitiveNull
 }
+
+fun tokenize(str: String): List<MetadataToken> {
+    val lexer = MetadataLexer(str)
+    val result = mutableListOf<MetadataToken>()
+    while (result.lastOrNull() != EOFToken) {
+        result.add(lexer.nextToken())
+    }
+    return result
+}
