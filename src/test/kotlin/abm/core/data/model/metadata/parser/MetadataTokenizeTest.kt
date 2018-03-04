@@ -20,12 +20,12 @@ class MetadataTokenizeTest {
         val p3 = PropertyMetadata("p3", MetadataClass(setOf(p4, p5)))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
-                    PropertyNameToken(p0.name), PrimitiveToken(p0.type as MetadataPrimitive),
-                    PropertyNameToken(p1.name), PrimitiveToken(p1.type as MetadataPrimitive),
-                    PropertyNameToken(p2.name), PrimitiveToken(p2.type as MetadataPrimitive),
-                    PropertyNameToken(p3.name), ObjectBegin,
-                        PropertyNameToken(p4.name), PrimitiveToken(p4.type as MetadataPrimitive),
-                        PropertyNameToken(p5.name), PrimitiveToken(p5.type as MetadataPrimitive),
+                    PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(p0.type as MetadataPrimitive),
+                    PropertyNameToken(p1.name), TypeSeparator, PrimitiveToken(p1.type as MetadataPrimitive),
+                    PropertyNameToken(p2.name), TypeSeparator, PrimitiveToken(p2.type as MetadataPrimitive),
+                    PropertyNameToken(p3.name), TypeSeparator, ObjectBegin,
+                        PropertyNameToken(p4.name), TypeSeparator, PrimitiveToken(p4.type as MetadataPrimitive),
+                        PropertyNameToken(p5.name), TypeSeparator, PrimitiveToken(p5.type as MetadataPrimitive),
                     ObjectEnd,
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p1, p2, p3))
@@ -47,12 +47,12 @@ class MetadataTokenizeTest {
         val p3 = PropertyMetadata("p3", MetadataClass(setOf(p4, p5)))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
-                    PropertyNameToken(p0.name), PrimitiveToken(p0.type as MetadataPrimitive),
-                    PropertyNameToken(p1.name), PrimitiveToken(p1.type as MetadataPrimitive),
-                    PropertyNameToken(p2.name), PrimitiveToken(p2.type as MetadataPrimitive),
-                    PropertyNameToken(p3.name), ObjectBegin,
-                        PropertyNameToken(p4.name), PrimitiveToken(p4.type as MetadataPrimitive),
-                        PropertyNameToken(p5.name), PrimitiveToken(p5.type as MetadataPrimitive),
+                    PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(p0.type as MetadataPrimitive),
+                    PropertyNameToken(p1.name), TypeSeparator, PrimitiveToken(p1.type as MetadataPrimitive),
+                    PropertyNameToken(p2.name), TypeSeparator, PrimitiveToken(p2.type as MetadataPrimitive),
+                    PropertyNameToken(p3.name), TypeSeparator, ObjectBegin,
+                        PropertyNameToken(p4.name), TypeSeparator, PrimitiveToken(p4.type as MetadataPrimitive),
+                        PropertyNameToken(p5.name), TypeSeparator, PrimitiveToken(p5.type as MetadataPrimitive),
                     ObjectEnd,
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p1, p2, p3))
@@ -70,12 +70,12 @@ class MetadataTokenizeTest {
         val p3 = PropertyMetadata("p3", MetadataList(MetadataClass(setOf(p4, p5))))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
-                    PropertyNameToken(p0.name), PrimitiveToken(PrimitiveLong),
-                    PropertyNameToken(p3.name),
+                    PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(PrimitiveLong),
+                    PropertyNameToken(p3.name), TypeSeparator,
                         ListBegin,
                             ObjectBegin,
-                                PropertyNameToken(p4.name), PrimitiveToken(p4.type as MetadataPrimitive),
-                                PropertyNameToken(p5.name), PrimitiveToken(p5.type as MetadataPrimitive),
+                                PropertyNameToken(p4.name), TypeSeparator, PrimitiveToken(p4.type as MetadataPrimitive),
+                                PropertyNameToken(p5.name), TypeSeparator, PrimitiveToken(p5.type as MetadataPrimitive),
                             ObjectEnd,
                         ListEnd,
                 ObjectEnd)
@@ -92,8 +92,8 @@ class MetadataTokenizeTest {
         val p3 = PropertyMetadata("p3", MetadataList(PrimitiveString))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
-                    PropertyNameToken(p0.name), PrimitiveToken(PrimitiveLong),
-                    PropertyNameToken(p3.name), ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
+                    PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(PrimitiveLong),
+                    PropertyNameToken(p3.name), TypeSeparator, ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p3))
 

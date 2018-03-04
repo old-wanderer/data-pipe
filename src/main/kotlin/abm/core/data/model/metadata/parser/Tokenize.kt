@@ -34,7 +34,13 @@ fun tokenize(str: String): List<MetadataToken> {
 fun tokenize(metadataClass: MetadataClass): Sequence<MetadataToken> = buildSequence {
     yield(ObjectBegin)
     for (property in metadataClass.properties) {
-        yield(PropertyNameToken(property.name, property.aliasNames))
+
+        yield(PropertyNameToken(property.name))
+        if (property.aliasNames.isNotEmpty()) {
+            yieldAll(property.aliasNames.flatMap { listOf(PropertyNameToken(it), AliasSeparator) }.dropLast(1))
+        }
+        yield(TypeSeparator)
+
         when (property.type) {
             is MetadataPrimitive -> yield(PrimitiveToken(property.type))
             is MetadataClass -> yieldAll(tokenize(property.type))
@@ -48,6 +54,7 @@ fun tokenize(metadataClass: MetadataClass): Sequence<MetadataToken> = buildSeque
                 yield(ListEnd)
             }
         }
+
     }
     yield(ObjectEnd)
 }

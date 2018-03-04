@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test
  * @author: Andrei Shlykov
  * @since: 24.02.2018
  */
+
+/**
+ * Тесты построения ast по списку токенов [MetadataToken]
+ */
 class MetadataAstBuildTest {
 
     @Test
@@ -21,7 +25,7 @@ class MetadataAstBuildTest {
 
     @Test
     fun onePropertyPrimitiveTest() {
-        val tokens = listOf(ObjectBegin, PropertyNameToken("p0"), PrimitiveToken(PrimitiveString), ObjectEnd)
+        val tokens = listOf(ObjectBegin, PropertyNameToken("p0"), TypeSeparator, PrimitiveToken(PrimitiveString), ObjectEnd)
         val ast = buildMetadataAstTree(tokens)
 
         var current = ast
@@ -32,7 +36,7 @@ class MetadataAstBuildTest {
         Assertions.assertEquals(1, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
         Assertions.assertEquals(PrimitiveString, current.type)
@@ -42,8 +46,8 @@ class MetadataAstBuildTest {
     fun twoPropertyPrimitiveTest() {
         val tokens = listOf(
                 ObjectBegin,
-                    PropertyNameToken("p0"), PrimitiveToken(PrimitiveString),
-                    PropertyNameToken("p1"), PrimitiveToken(PrimitiveString),
+                    PropertyNameToken("p0"), TypeSeparator, PrimitiveToken(PrimitiveString),
+                    PropertyNameToken("p1"), TypeSeparator, PrimitiveToken(PrimitiveString),
                 ObjectEnd)
         val ast = buildMetadataAstTree(tokens)
 
@@ -55,7 +59,7 @@ class MetadataAstBuildTest {
         Assertions.assertEquals(2, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
         Assertions.assertEquals(PrimitiveString, current.type)
@@ -64,8 +68,8 @@ class MetadataAstBuildTest {
     @Test
     fun onePropertyObjectTest() {
         val tokens = listOf(
-                ObjectBegin, PropertyNameToken("p0"),
-                    ObjectBegin, PropertyNameToken("p0"), PrimitiveToken(PrimitiveString), ObjectEnd,
+                ObjectBegin, PropertyNameToken("p0"), TypeSeparator,
+                    ObjectBegin, PropertyNameToken("p0"), TypeSeparator, PrimitiveToken(PrimitiveString), ObjectEnd,
                 ObjectEnd)
         val ast = buildMetadataAstTree(tokens)
 
@@ -77,12 +81,12 @@ class MetadataAstBuildTest {
         Assertions.assertEquals(1, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataClassNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         current = current.type as MetadataClassNode
         Assertions.assertEquals(1, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataPrimitiveNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
         Assertions.assertEquals(PrimitiveString, current.type)
@@ -91,7 +95,7 @@ class MetadataAstBuildTest {
     @Test
     fun onePropertyListOfPrimitiveTest() {
         val tokens = listOf(
-                ObjectBegin, PropertyNameToken("p0"),
+                ObjectBegin, PropertyNameToken("p0"), TypeSeparator,
                     ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
                 ObjectEnd)
         val ast = buildMetadataAstTree(tokens)
@@ -104,7 +108,7 @@ class MetadataAstBuildTest {
         Assertions.assertEquals(1, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataListNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         current = current.type as MetadataListNode
         Assertions.assertTrue(current.containedType is MetadataPrimitiveNode)
         current = current.containedType as MetadataPrimitiveNode
@@ -114,9 +118,9 @@ class MetadataAstBuildTest {
     @Test
     fun onePropertyListOfObjectTest() {
         val tokens = listOf(
-                ObjectBegin, PropertyNameToken("p0"),
+                ObjectBegin, PropertyNameToken("p0"), TypeSeparator,
                     ListBegin,
-                        ObjectBegin, PropertyNameToken("p0"), PrimitiveToken(PrimitiveString), ObjectEnd,
+                        ObjectBegin, PropertyNameToken("p0"), TypeSeparator, PrimitiveToken(PrimitiveString), ObjectEnd,
                     ListEnd,
                 ObjectEnd)
         val ast = buildMetadataAstTree(tokens)
@@ -129,13 +133,13 @@ class MetadataAstBuildTest {
         Assertions.assertEquals(1, current.properties.size)
         Assertions.assertTrue(current.properties.first().type is MetadataListNode)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         current = current.type as MetadataListNode
         Assertions.assertTrue(current.containedType is MetadataClassNode)
         current = current.containedType as MetadataClassNode
         Assertions.assertEquals(1, current.properties.size)
         current = current.properties.first()
-        Assertions.assertEquals("p0", current.name)
+        Assertions.assertEquals("p0", current.names.first().name)
         Assertions.assertTrue(current.type is MetadataPrimitiveNode)
         current = current.type as MetadataPrimitiveNode
         Assertions.assertEquals(PrimitiveString, current.type)

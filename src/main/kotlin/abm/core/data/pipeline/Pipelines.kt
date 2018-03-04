@@ -32,11 +32,13 @@ object Pipelines {
                 fun String.isBadName() = this[0] == '/'
                 fun String.correctBadName() = this.substring(1)
 
+                throw RuntimeException("нужно исправить реализацию, так как токены изменились")
+
                 if (source is MetadataClass) {
                     buildMetadata(buildMetadataAstTree(tokenize(source).map { token ->
                         if (token is PropertyNameToken) {
                             if (token.name.isBadName()) {
-                                return@map PropertyNameToken(token.name.correctBadName(), token.aliases + token.name)
+//                                return@map PropertyNameToken(token.name.correctBadName(), token.aliases + token.name)
                             }
                         }
                         token

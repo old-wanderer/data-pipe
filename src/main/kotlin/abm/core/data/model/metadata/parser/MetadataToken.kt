@@ -8,7 +8,7 @@ import abm.core.data.model.metadata.*
  */
 sealed class MetadataToken
 data class PrimitiveToken(val type: MetadataPrimitive): MetadataToken()
-data class PropertyNameToken(val name: String, val aliases: Set<String> = emptySet()): MetadataToken()
+data class PropertyNameToken(val name: String): MetadataToken()
 
 object TypeSeparator: MetadataToken()
 object AliasSeparator: MetadataToken()
@@ -24,17 +24,14 @@ object ListEnd: MetadataToken()
 abstract class MetadataAstNode(val parent: MetadataAstNode? = null) {
 
     init {
-        parent?.addChild(this)
+        parent?.children?.add(this)
     }
 
-    val children = mutableSetOf<MetadataAstNode>()
-
-    @Deprecated("use children.add(child)")
-    fun addChild(child: MetadataAstNode) {
-        children.add(child)
-    }
+    val children = LinkedHashSet<MetadataAstNode>()
 
 }
+
+abstract class MetadataAstTypeNode(parent: MetadataAstNode): MetadataAstNode(parent)
 
 class RootNode: MetadataAstNode() {
 
@@ -42,27 +39,30 @@ class RootNode: MetadataAstNode() {
         get() = children.firstOrNull()
 }
 
-class MetadataClassNode(parent: MetadataAstNode): MetadataAstNode(parent) {
+class MetadataClassNode(parent: MetadataAstNode): MetadataAstTypeNode(parent) {
 
     val properties: Set<MetadataPropertyNode>
         get() = children as Set<MetadataPropertyNode>
 }
 
-class MetadataListNode(parent: MetadataAstNode): MetadataAstNode(parent) {
+class MetadataListNode(parent: MetadataAstNode): MetadataAstTypeNode(parent) {
 
     val containedType: MetadataAstNode?
         get() = children.firstOrNull()
 }
 
-data class MetadataPrimitiveNode(val type: MetadataPrimitive): MetadataAstNode()
+class MetadataPrimitiveNode(val type: MetadataPrimitive, parent: MetadataAstNode): MetadataAstTypeNode(parent)
 
-class MetadataPropertyNode(val name: String,
-                           parent: MetadataAstNode,
-                           val aliases: Set<String> = setOf()) : MetadataAstNode(parent) {
+class MetadataPropertyNode(parent: MetadataAstNode) : MetadataAstNode(parent) {
+
+    val names: List<MetadataPropertyNameNode>
+        get() = children.filter { it is MetadataPropertyNameNode } as List<MetadataPropertyNameNode>
 
     val type: MetadataAstNode?
-        get() = children.firstOrNull()
+        get() = children.firstOrNull { it is MetadataAstTypeNode }
 }
+
+class MetadataPropertyNameNode(val name: String, parent: MetadataAstNode): MetadataAstNode(parent)
 
 // ---------------------------------------------------------------------------------
 
@@ -88,7 +88,8 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
 
             is PropertyNameToken -> {
                 if (current is MetadataClassNode) {
-                    MetadataPropertyNode(token.name, current, token.aliases)
+                    val propNode = MetadataPropertyNode(current)
+                    MetadataPropertyNameNode(token.name, propNode)
                 } else {
                     throw RuntimeException("can't attach PropertyNameNode")
                 }
@@ -97,11 +98,11 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
             is PrimitiveToken -> {
                 when (current) {
                     is MetadataPropertyNode -> {
-                        current.addChild(MetadataPrimitiveNode(token.type))
+                        current.children.add(MetadataPrimitiveNode(token.type, current))
                         current.parent!!
                     }
                     is MetadataListNode -> {
-                        current.addChild(MetadataPrimitiveNode(token.type))
+                        current.children.add(MetadataPrimitiveNode(token.type, current))
                         current
                     }
                     else -> throw RuntimeException("sddssd")
@@ -122,8 +123,9 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
                 }
             }
 
-            // TODO передалть построение ast
-            else -> throw RuntimeException("unexpected token $token")
+            TypeSeparator -> current.parent!!
+            AliasSeparator -> current.parent!!
+            EOFToken -> if (current is RootNode) current else throw RuntimeException("unexpected EOFToken")
         }
     }
 
@@ -134,7 +136,10 @@ fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
     is RootNode -> buildMetadata(node.child!!)
     is MetadataClassNode -> MetadataClass(node.properties.map { buildMetadata(it) as PropertyMetadata }.toSet())
     is MetadataListNode -> MetadataList(buildMetadata(node.containedType!!) as MetadataType)
-    is MetadataPropertyNode -> PropertyMetadata(node.name, buildMetadata(node.type!!) as MetadataType, node.aliases)
+    is MetadataPropertyNode -> PropertyMetadata(
+            node.names.first().name,
+            buildMetadata(node.type!!) as MetadataType,
+            node.names.drop(1).map(MetadataPropertyNameNode::name).toSet())
     is MetadataPrimitiveNode -> node.type
 
     else -> throw RuntimeException("can't process $node")
