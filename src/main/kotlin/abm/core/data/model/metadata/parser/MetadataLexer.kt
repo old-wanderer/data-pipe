@@ -1,5 +1,6 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
 
+import abm.core.data.model.metadata.*
 import java.io.BufferedReader
 import java.io.StringReader
 import java.util.*

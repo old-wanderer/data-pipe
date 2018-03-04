@@ -1,6 +1,8 @@
 package abm.core.data.model.metadata
 
+import abm.core.data.model.metadata.parser.*
 import com.google.gson.JsonElement
+import kotlin.coroutines.experimental.buildSequence
 
 /**
  * @author: Andrei Shlykov
@@ -8,6 +10,12 @@ import com.google.gson.JsonElement
  */
 // todo перенести сюда все утильные методы
 
+/**
+ * строит метаданные для переданного json объекта
+ *
+ * @param jsonElement
+ * @return метаданные соответствующие jsonElement
+ */
 fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
     jsonElement.isJsonObject -> {
         val properties = mutableSetOf<PropertyMetadata>()
@@ -31,15 +39,5 @@ fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
             else -> PrimitiveString
         }
     }
-    jsonElement.isJsonNull -> PrimitiveNull
     else -> PrimitiveNull
-}
-
-fun tokenize(str: String): List<MetadataToken> {
-    val lexer = MetadataLexer(str)
-    val result = mutableListOf<MetadataToken>()
-    while (result.lastOrNull() != EOFToken) {
-        result.add(lexer.nextToken())
-    }
-    return result
 }

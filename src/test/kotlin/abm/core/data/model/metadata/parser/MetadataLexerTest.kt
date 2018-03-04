@@ -1,5 +1,7 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
 
+import abm.core.data.model.metadata.PrimitiveLong
+import abm.core.data.model.metadata.PrimitiveString
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -8,10 +10,9 @@ import org.junit.jupiter.api.TestFactory
  * @author: Andrei Shlykov
  * @since: 03.03.2018
  */
-// TODO add more tests
 class MetadataLexerTest {
 
-    private val testGroup1Tokens = listOf(ObjectBegin, PropertyNameToken("name1"), TypeSeparator, PrimitiveToken(PrimitiveString),  ObjectEnd, EOFToken)
+    private val testGroup1Tokens = listOf(ObjectBegin, PropertyNameToken("name1"), TypeSeparator, PrimitiveToken(PrimitiveString), ObjectEnd, EOFToken)
     private val testGroup2Tokens = listOf(ObjectBegin, PropertyNameToken("name1"), TypeSeparator, ListBegin, PrimitiveToken(PrimitiveString), ListEnd, ObjectEnd, EOFToken)
     private val testGroup3Tokens = listOf(
             ObjectBegin,

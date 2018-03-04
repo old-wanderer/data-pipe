@@ -3,6 +3,7 @@ package abm.core.data.pipeline
 import abm.core.data.generator.ClassGenerator
 import abm.core.data.handler.DataRepository
 import abm.core.data.model.metadata.*
+import abm.core.data.model.metadata.parser.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import java.io.BufferedReader
@@ -32,7 +33,7 @@ object Pipelines {
                 fun String.correctBadName() = this.substring(1)
 
                 if (source is MetadataClass) {
-                    buildMetadata(buildMetadataAstTree(metadataTokens(source).map { token ->
+                    buildMetadata(buildMetadataAstTree(tokenize(source).map { token ->
                         if (token is PropertyNameToken) {
                             if (token.name.isBadName()) {
                                 return@map PropertyNameToken(token.name.correctBadName(), token.aliases + token.name)
@@ -48,7 +49,7 @@ object Pipelines {
     fun removeUnnecessaryProperties(): PipelineElement<Metadata, Metadata> =
             PipelineElement {
                 if (it is MetadataClass) {
-                    val ast = buildMetadataAstTree(metadataTokens(it).toList())
+                    val ast = buildMetadataAstTree(tokenize(it).toList())
                     dfsMetadataAst(ast)
                     return@PipelineElement buildMetadata(ast)
                 }

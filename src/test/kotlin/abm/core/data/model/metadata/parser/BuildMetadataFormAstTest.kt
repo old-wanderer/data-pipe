@@ -1,5 +1,6 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
 
+import abm.core.data.model.metadata.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -12,7 +13,7 @@ class BuildMetadataFormAstTest {
     @Test
     fun case1() {
         val tokens = listOf(ObjectBegin, PropertyNameToken("p0"), PrimitiveToken(PrimitiveString), ObjectEnd)
-        val expected = metadataClass { + PrimitiveString }
+        val expected = metadataClass { +PrimitiveString }
 
         Assertions.assertEquals(expected, buildMetadata(buildMetadataAstTree(tokens)))
     }
@@ -25,8 +26,8 @@ class BuildMetadataFormAstTest {
                     PropertyNameToken("p1"), PrimitiveToken(PrimitiveDouble),
                 ObjectEnd)
         val expected = metadataClass {
-            + PrimitiveString
-            + PrimitiveDouble
+            +PrimitiveString
+            +PrimitiveDouble
         }
 
         Assertions.assertEquals(expected, buildMetadata(buildMetadataAstTree(tokens)))
@@ -40,9 +41,9 @@ class BuildMetadataFormAstTest {
                     PropertyNameToken("p1"), ObjectBegin, PropertyNameToken("p0"), PrimitiveToken(PrimitiveString), ObjectEnd,
                 ObjectEnd)
         val expected = metadataClass {
-            + PrimitiveString
-            + metadataClass {
-                + PrimitiveString
+            +PrimitiveString
+            +metadataClass {
+                +PrimitiveString
             }
         }
 
@@ -57,8 +58,8 @@ class BuildMetadataFormAstTest {
                     PropertyNameToken("p1"), ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
                 ObjectEnd)
         val expected = metadataClass {
-            + PrimitiveString
-            + metadataList(PrimitiveString)
+            +PrimitiveString
+            +metadataList(PrimitiveString)
         }
 
         Assertions.assertEquals(expected, buildMetadata(buildMetadataAstTree(tokens)))
@@ -74,9 +75,9 @@ class BuildMetadataFormAstTest {
                     ListEnd,
                 ObjectEnd)
         val expected = metadataClass {
-            + PrimitiveString
-            + metadataList(metadataClass {
-                + PrimitiveString
+            +PrimitiveString
+            +metadataList(metadataClass {
+                +PrimitiveString
             })
         }
 
@@ -86,31 +87,31 @@ class BuildMetadataFormAstTest {
     @Test
     fun bigCase1() {
         val model = metadataClass {
-            + PrimitiveLong
-            + PrimitiveString
-            + PrimitiveDouble
-            + metadataList(PrimitiveString)
-            + metadataList(PrimitiveBoolean)
-            + metadataClass {
-                + PrimitiveString
-                + PrimitiveString
+            +PrimitiveLong
+            +PrimitiveString
+            +PrimitiveDouble
+            +metadataList(PrimitiveString)
+            +metadataList(PrimitiveBoolean)
+            +metadataClass {
+                +PrimitiveString
+                +PrimitiveString
             }
-            + metadataClass {
-                + PrimitiveBoolean
-                + PrimitiveDouble
-                + metadataClass {
-                    + PrimitiveString
-                    + PrimitiveString
+            +metadataClass {
+                +PrimitiveBoolean
+                +PrimitiveDouble
+                +metadataClass {
+                    +PrimitiveString
+                    +PrimitiveString
                 }
             }
-            + PrimitiveString
-            + metadataList(metadataClass {
-                + PrimitiveString
-                + PrimitiveString
+            +PrimitiveString
+            +metadataList(metadataClass {
+                +PrimitiveString
+                +PrimitiveString
             })
         }
 
-        Assertions.assertEquals(model, buildMetadata(buildMetadataAstTree(metadataTokens(model).toList())))
+        Assertions.assertEquals(model, buildMetadata(buildMetadataAstTree(tokenize(model).toList())))
     }
 
 }

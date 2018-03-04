@@ -1,5 +1,6 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
 
+import abm.core.data.model.metadata.PrimitiveString
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

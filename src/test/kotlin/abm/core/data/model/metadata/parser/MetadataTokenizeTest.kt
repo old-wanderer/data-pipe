@@ -1,14 +1,14 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
 
+import abm.core.data.model.metadata.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
 
 /**
  * @author: Andrei Shlykov
  * @since: 17.02.2018
  */
-class MetadataClassIteratorTest {
+class MetadataTokenizeTest {
 
     @Test
     fun allPropsVisit() {
@@ -30,7 +30,7 @@ class MetadataClassIteratorTest {
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p1, p2, p3))
 
-        for (token in metadataTokens(model)) {
+        for (token in tokenize(model)) {
             Assertions.assertTrue(token in expectedTokens) { "token $token not contains" }
             expectedTokens.removeAt(expectedTokens.indexOf(token))
         }
@@ -57,7 +57,7 @@ class MetadataClassIteratorTest {
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p1, p2, p3))
 
-        for ((index, token) in metadataTokens(model).withIndex()) {
+        for ((index, token) in tokenize(model).withIndex()) {
             Assertions.assertEquals(expectedTokens[index], token) { "index: $index" }
         }
     }
@@ -81,7 +81,7 @@ class MetadataClassIteratorTest {
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p3))
 
-        for ((index, token) in metadataTokens(model).withIndex()) {
+        for ((index, token) in tokenize(model).withIndex()) {
             Assertions.assertEquals(expectedTokens[index], token) { "index: $index" }
         }
     }
@@ -97,7 +97,7 @@ class MetadataClassIteratorTest {
                 ObjectEnd)
         val model = MetadataClass(setOf(p0, p3))
 
-        for ((index, token) in metadataTokens(model).withIndex()) {
+        for ((index, token) in tokenize(model).withIndex()) {
             Assertions.assertEquals(expectedTokens[index], token) { "index: $index" }
         }
     }

@@ -1,4 +1,6 @@
-package abm.core.data.model.metadata
+package abm.core.data.model.metadata.parser
+
+import abm.core.data.model.metadata.*
 
 /**
  * @author: Andrei Shlykov
@@ -131,8 +133,8 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
 fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
     is RootNode -> buildMetadata(node.child!!)
     is MetadataClassNode -> MetadataClass(node.properties.map { buildMetadata(it) as PropertyMetadata }.toSet())
-    is MetadataListNode  -> MetadataList(buildMetadata(node.containedType!!) as MetadataType)
-    is MetadataPropertyNode  -> PropertyMetadata(node.name, buildMetadata(node.type!!) as MetadataType, node.aliases)
+    is MetadataListNode -> MetadataList(buildMetadata(node.containedType!!) as MetadataType)
+    is MetadataPropertyNode -> PropertyMetadata(node.name, buildMetadata(node.type!!) as MetadataType, node.aliases)
     is MetadataPrimitiveNode -> node.type
 
     else -> throw RuntimeException("can't process $node")
