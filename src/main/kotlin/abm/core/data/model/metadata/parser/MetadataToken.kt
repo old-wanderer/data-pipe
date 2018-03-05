@@ -1,5 +1,6 @@
 package abm.core.data.model.metadata.parser
 
+import abm.core.data.common.Visited
 import abm.core.data.model.metadata.*
 
 /**
@@ -21,13 +22,16 @@ object ListEnd: MetadataToken()
 
 
 @Suppress("LeakingThis")
-abstract class MetadataAstNode(val parent: MetadataAstNode? = null) {
+abstract class MetadataAstNode(val parent: MetadataAstNode? = null)
+    : Visited<MetadataAstNodeVisitor>, Iterable<MetadataAstNode> {
 
     init {
         parent?.children?.add(this)
     }
 
     val children = LinkedHashSet<MetadataAstNode>()
+
+    override fun iterator(): Iterator<MetadataAstNode> = BfsTreeIterator(this)
 
 }
 
@@ -37,21 +41,30 @@ class RootNode: MetadataAstNode() {
 
     val child: MetadataAstNode?
         get() = children.firstOrNull()
+
+    override fun visit(visitor: MetadataAstNodeVisitor) {}
 }
 
 class MetadataClassNode(parent: MetadataAstNode): MetadataAstTypeNode(parent) {
 
     val properties: Set<MetadataPropertyNode>
         get() = children as Set<MetadataPropertyNode>
+
+    override fun visit(visitor: MetadataAstNodeVisitor) = visitor.visitMetadataClassNode(this)
 }
 
 class MetadataListNode(parent: MetadataAstNode): MetadataAstTypeNode(parent) {
 
     val containedType: MetadataAstNode?
         get() = children.firstOrNull()
+
+    override fun visit(visitor: MetadataAstNodeVisitor) = visitor.visitMetadataListNode(this)
 }
 
-class MetadataPrimitiveNode(val type: MetadataPrimitive, parent: MetadataAstNode): MetadataAstTypeNode(parent)
+class MetadataPrimitiveNode(val type: MetadataPrimitive, parent: MetadataAstNode): MetadataAstTypeNode(parent) {
+
+    override fun visit(visitor: MetadataAstNodeVisitor) = visitor.visitMetadataPrimitiveTypeNode(this)
+}
 
 class MetadataPropertyNode(parent: MetadataAstNode) : MetadataAstNode(parent) {
 
@@ -60,9 +73,14 @@ class MetadataPropertyNode(parent: MetadataAstNode) : MetadataAstNode(parent) {
 
     val type: MetadataAstNode?
         get() = children.firstOrNull { it is MetadataAstTypeNode }
+
+    override fun visit(visitor: MetadataAstNodeVisitor) = visitor.visitMetadataPropertyNode(this)
 }
 
-class MetadataPropertyNameNode(val name: String, parent: MetadataAstNode): MetadataAstNode(parent)
+class MetadataPropertyNameNode(val name: String, parent: MetadataAstNode): MetadataAstNode(parent) {
+
+    override fun visit(visitor: MetadataAstNodeVisitor) = visitor.visitMetadataPropertyNameNode(this)
+}
 
 // ---------------------------------------------------------------------------------
 
@@ -86,13 +104,13 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
                 }
             }
 
-            is PropertyNameToken -> {
-                if (current is MetadataClassNode) {
+            is PropertyNameToken -> when (current) {
+                is MetadataClassNode -> {
                     val propNode = MetadataPropertyNode(current)
                     MetadataPropertyNameNode(token.name, propNode)
-                } else {
-                    throw RuntimeException("can't attach PropertyNameNode")
                 }
+                is MetadataPropertyNode -> MetadataPropertyNameNode(token.name, current)
+                else -> throw RuntimeException("can't attach PropertyNameNode")
             }
 
             is PrimitiveToken -> {

@@ -9,6 +9,7 @@ import com.google.gson.JsonParser
 import java.io.BufferedReader
 import java.io.FileReader
 import java.util.stream.Collectors
+import kotlin.collections.LinkedHashSet
 
 /**
  * @author: Andrei Shlykov
@@ -25,24 +26,14 @@ object Pipelines {
     fun parseData(path: String, limit: Long = -1): PipelineElement<Class<*>, DataRepository> =
             DataParser(path, limit)
 
-    // TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
     fun aliasForBadNames(): PipelineElement<Metadata, Metadata> =
             PipelineElement { source ->
 
-                fun String.isBadName() = this[0] == '/'
-                fun String.correctBadName() = this.substring(1)
-
-                throw RuntimeException("нужно исправить реализацию, так как токены изменились")
-
                 if (source is MetadataClass) {
-                    buildMetadata(buildMetadataAstTree(tokenize(source).map { token ->
-                        if (token is PropertyNameToken) {
-                            if (token.name.isBadName()) {
-//                                return@map PropertyNameToken(token.name.correctBadName(), token.aliases + token.name)
-                            }
-                        }
-                        token
-                    }.toList()))
+                    val root = buildMetadataAstTree(tokenize(source).toList())
+                    val visitor = AliasForBadNameVisitor()
+                    root.forEach { it.visit(visitor) }
+                    buildMetadata(root)
                 } else {
                     source!!
                 }
@@ -113,5 +104,28 @@ object Pipelines {
                 // надо понять как MetadataType::combine все сломал
                 .reduce(PrimitiveNull) { acc, met -> acc combine met}
     })
+
+    // TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
+    // по умаолчанию должно проверять корректность индетификатора в java
+    private class AliasForBadNameVisitor: MetadataAstNodeVisitor {
+
+        fun String.isBadName() = this[0] == '/'
+        fun String.correctBadName() = this.substring(1)
+
+        override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
+            val nameNode = node.names.first()
+            if (nameNode.name.isBadName()) {
+                // пересобираются, так как надо поддерживать порядок
+                // говнокод какой-то :( // FIXME
+                val newChildren = LinkedHashSet<MetadataAstNode>()
+                newChildren.add(MetadataPropertyNameNode(nameNode.name.correctBadName(), node))
+                node.children.remove(nameNode)
+                newChildren.addAll(node.children)
+                newChildren.add(MetadataPropertyNameNode(nameNode.name, node))
+                node.children.removeIf { true }
+                node.children.addAll(newChildren)
+            }
+        }
+    }
 
 }
