@@ -102,4 +102,20 @@ class MetadataTokenizeTest {
         }
     }
 
+    @Test
+    fun aliasNameTest() {
+        val source = metadataClass {
+            + ("p0" to PrimitiveLong)
+            + ("p1" or "p01" to PrimitiveLong)
+            + ("p2" or "p02" or "p10" to PrimitiveLong)
+        }
+        val expectedTokens = listOf(
+                ObjectBegin,
+                    PropertyNameToken("p0"), TypeSeparator, PrimitiveToken(PrimitiveLong),
+                    PropertyNameToken("p1"), AliasSeparator, PropertyNameToken("p01"), TypeSeparator, PrimitiveToken(PrimitiveLong),
+                    PropertyNameToken("p2"), AliasSeparator, PropertyNameToken("p02"), AliasSeparator, PropertyNameToken("p10"), TypeSeparator, PrimitiveToken(PrimitiveLong),
+                ObjectEnd)
+        Assertions.assertEquals(expectedTokens, tokenize(source).toList())
+    }
+
 }

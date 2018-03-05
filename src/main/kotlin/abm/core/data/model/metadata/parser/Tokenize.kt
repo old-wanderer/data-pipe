@@ -37,7 +37,10 @@ fun tokenize(metadataClass: MetadataClass): Sequence<MetadataToken> = buildSeque
 
         yield(PropertyNameToken(property.name))
         if (property.aliasNames.isNotEmpty()) {
-            yieldAll(property.aliasNames.flatMap { listOf(PropertyNameToken(it), AliasSeparator) }.dropLast(1))
+            for (alias in property.aliasNames) {
+                yield(AliasSeparator)
+                yield(PropertyNameToken(alias))
+            }
         }
         yield(TypeSeparator)
 
