@@ -100,9 +100,7 @@ object Pipelines {
         }
         stream
                 .map { constructMetadataFromJson(parser.parse(it)) }
-                // TODO раньше работало .reduce(PrimitiveNull, Metadata::combine)
-                // надо понять как MetadataType::combine все сломал
-                .reduce(PrimitiveNull) { acc, met -> acc combine met}
+                .reduce(PrimitiveNull, MetadataType::combine)
     })
 
     // TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
