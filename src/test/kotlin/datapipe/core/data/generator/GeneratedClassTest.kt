@@ -31,6 +31,7 @@ class GeneratedClassTest {
         Assertions.assertEquals("prop3_2", TestObject.getPropertyValue("prop3.prop3_2"))
     }
 
+    // TODO перенести в ClassGeneratorTest
     // ABM-6
     @Test
     fun classGeneratedTest() {
@@ -77,6 +78,23 @@ class GeneratedClassTest {
                 }
         )
 
+    }
+
+    // TODO перенести в ClassGeneratorTest
+    @Test
+    fun staticMetadataLinkTest() {
+        val metadata = metadataClass {
+            + PrimitiveLong
+            + PrimitiveString
+            + metadataList(PrimitiveDouble)
+            + metadataClass {
+                + PrimitiveLong
+                + PrimitiveString
+                + metadataList(PrimitiveDouble)
+            }
+        }
+
+        Assertions.assertEquals(metadata, ClassGenerator.generateClass(metadata).metadata())
     }
 
 

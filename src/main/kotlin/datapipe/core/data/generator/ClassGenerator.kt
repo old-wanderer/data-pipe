@@ -2,9 +2,12 @@ package datapipe.core.data.generator
 
 import datapipe.core.data.model.metadata.*
 import com.google.gson.annotations.SerializedName
+import datapipe.core.data.model.metadata.parser.serialize
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import java.io.File
+import java.io.FileOutputStream
 
 /**
  * @author: andrei shlykov
@@ -23,7 +26,7 @@ object ClassGenerator {
         val className = genClassName()
 
         classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC,
-                "abm/core/data/generated/$className", null,
+                "datapipe/core/data/generated/$className", null,
                 GENERATED_CLASS_FULL_NAME, null)
 
         val defaultConstructor = classWriter.visitMethod(Opcodes.ACC_PUBLIC,
@@ -36,13 +39,59 @@ object ClassGenerator {
         defaultConstructor.visitMaxs(1, 1)
         defaultConstructor.visitEnd()
 
+        genStaticMetadataClass(metadata, classWriter, "datapipe/core/data/generated/$className")
+
         for (property in metadata.properties) {
             genProperty(property, classWriter)
         }
 
         classWriter.visitEnd()
 
-        return loader.loadNewClass("abm.core.data.generated.$className", classWriter.toByteArray())
+        return loader.loadNewClass("datapipe.core.data.generated.$className", classWriter.toByteArray()) as Class<GeneratedClass>
+    }
+
+    private fun genStaticMetadataClass(metadata: MetadataClass, classWriter: ClassWriter, className: String) {
+        classWriter.visitField(
+                Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC + Opcodes.ACC_FINAL,
+                "_metadata",
+                "Ldatapipe/core/data/model/metadata/Metadata;",
+                null,
+                null
+        ).visitEnd()
+
+
+        val staticConstructor = classWriter.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null)
+        staticConstructor.visitCode()
+        staticConstructor.visitLdcInsn(serialize(metadata))
+        staticConstructor.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                "datapipe/core/data/model/metadata/parser/TokenizeKt",
+                "tokenize",
+                "(Ljava/lang/String;)Ljava/util/List;",
+                false)
+        staticConstructor.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                "datapipe/core/data/model/metadata/parser/MetadataTokenKt",
+                "buildMetadataAstTree",
+                "(Ljava/lang/Iterable;)Ldatapipe/core/data/model/metadata/parser/MetadataAstNode;",
+                false
+        )
+        staticConstructor.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                "datapipe/core/data/model/metadata/parser/MetadataTokenKt",
+                "buildMetadata",
+                "(Ldatapipe/core/data/model/metadata/parser/MetadataAstNode;)Ldatapipe/core/data/model/metadata/Metadata;",
+                false
+        )
+        staticConstructor.visitFieldInsn(
+                Opcodes.PUTSTATIC,
+                className,
+                "_metadata",
+                "Ldatapipe/core/data/model/metadata/Metadata;"
+        )
+        staticConstructor.visitInsn(Opcodes.RETURN)
+        staticConstructor.visitMaxs(2, 2)
+        staticConstructor.visitEnd()
     }
 
     private fun genProperty(propertyMetadata: PropertyMetadata, classWriter: ClassWriter) {
@@ -61,6 +110,7 @@ object ClassGenerator {
                 return
             }
         }
+        // TODO тест на генерацию SerializedName
         if (propertyMetadata.aliasNames.isNotEmpty()) {
             val annotation = field.visitAnnotation(Type.getDescriptor(SerializedName::class.java), true)
             annotation.visit("value", propertyMetadata.aliasNames.first())
@@ -73,12 +123,12 @@ object ClassGenerator {
     }
 
     private fun getRealType(metadata: Metadata, maybePrimitive: Boolean = false): String = when (metadata) {
-        PrimitiveString -> Type.getDescriptor(String::class.java)
-        PrimitiveDouble -> if (maybePrimitive) Type.DOUBLE_TYPE.descriptor  else "Ljava/lang/Double;"
+        PrimitiveString  -> Type.getDescriptor(String::class.java)
+        PrimitiveDouble  -> if (maybePrimitive) Type.DOUBLE_TYPE.descriptor  else "Ljava/lang/Double;"
         PrimitiveBoolean -> if (maybePrimitive) Type.BOOLEAN_TYPE.descriptor else "Ljava/lang/Boolean;"
-        PrimitiveLong -> if (maybePrimitive) Type.LONG_TYPE.descriptor    else "Ljava/lang/Long;"
+        PrimitiveLong    -> if (maybePrimitive) Type.LONG_TYPE.descriptor    else "Ljava/lang/Long;"
         is MetadataClass -> Type.getDescriptor(generateClass(metadata))
-        is MetadataList -> "Ljava/util/List<${getRealType(metadata.containsType)}>;"
+        is MetadataList  -> "Ljava/util/List<${getRealType(metadata.containsType)}>;"
         else -> throw RuntimeException("Don't know type: $metadata")
     }
 
