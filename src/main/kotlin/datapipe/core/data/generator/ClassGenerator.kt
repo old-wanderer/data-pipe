@@ -20,14 +20,29 @@ object ClassGenerator {
 
     private var autoNameCounter = 0
 
-    fun generateClass(metadata: MetadataClass): Class<*> {
-
-        val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
+    fun generateClassAndSave(metadata: MetadataClass, file: String): Class<GeneratedClass> {
         val className = genClassName()
+        val byteCode = generateByteCode(className, metadata)
+
+        val fileWriter = FileOutputStream(File(file))
+        fileWriter.write(byteCode)
+        fileWriter.close()
+
+        return loadClass(className, byteCode)
+    }
+
+    fun generateClass(metadata: MetadataClass): Class<GeneratedClass> {
+        val className = "datapipe/core/data/generated/${genClassName()}"
+        val byteCode = generateByteCode(className, metadata)
+        return loadClass(className, byteCode)
+    }
+
+    fun generateByteCode(className: String, metadata: MetadataClass): ByteArray {
+        val classWriter = ClassWriter(ClassWriter.COMPUTE_FRAMES)
+
 
         classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC,
-                "datapipe/core/data/generated/$className", null,
-                GENERATED_CLASS_FULL_NAME, null)
+                className, null, GENERATED_CLASS_FULL_NAME, null)
 
         val defaultConstructor = classWriter.visitMethod(Opcodes.ACC_PUBLIC,
                 "<init>", "()V", null, null)
@@ -39,16 +54,18 @@ object ClassGenerator {
         defaultConstructor.visitMaxs(1, 1)
         defaultConstructor.visitEnd()
 
-        genStaticMetadataClass(metadata, classWriter, "datapipe/core/data/generated/$className")
+        genStaticMetadataClass(metadata, classWriter, className)
 
         for (property in metadata.properties) {
             genProperty(property, classWriter)
         }
 
         classWriter.visitEnd()
-
-        return loader.loadNewClass("datapipe.core.data.generated.$className", classWriter.toByteArray()) as Class<GeneratedClass>
+        return classWriter.toByteArray()
     }
+
+    private fun loadClass(className: String, byteCode: ByteArray): Class<GeneratedClass> =
+            loader.loadNewClass(className.replace("/", "."), byteCode) as Class<GeneratedClass>
 
     private fun genStaticMetadataClass(metadata: MetadataClass, classWriter: ClassWriter, className: String) {
         classWriter.visitField(
