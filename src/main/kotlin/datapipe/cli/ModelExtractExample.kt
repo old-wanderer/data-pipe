@@ -62,7 +62,7 @@ fun main(args: Array<String>) {
     println("-----------------------------------")
     println("decision;location;organization;person;[(name, category)];document_url;source_url;links")
     for (key in dataIndex.keys) {
-        val data = dataIndex[key]!!.first() as GeneratedClass
+        val data = dataIndex[key]!!.first()
         val event = eventsIndex[key]!!.distinct()
         println("${data.getPropertyValue("decision")};" +
                 "${data.getPropertyValue("named_entities.LOCATION")};" +

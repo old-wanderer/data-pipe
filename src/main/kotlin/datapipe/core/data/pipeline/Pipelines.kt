@@ -6,6 +6,7 @@ import datapipe.core.data.model.metadata.*
 import datapipe.core.data.model.metadata.parser.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.Metadata
 import datapipe.core.data.model.metadata.MetadataType
 import datapipe.core.data.model.metadata.PrimitiveNull
@@ -23,10 +24,10 @@ object Pipelines {
     fun extractModelFrom(path: String, limit: Long = -1): PipelineElement<Unit, Metadata> =
             ModelExtractor(path, limit)
 
-    fun generateClass(): PipelineElement<Metadata, Class<*>> =
+    fun generateClass(): PipelineElement<Metadata, Class<GeneratedClass>> =
             PipelineElement { ClassGenerator.generateClass(it as MetadataClass) }
 
-    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<*>, DataRepository> =
+    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<GeneratedClass>, DataRepository> =
             DataParser(path, limit)
 
     fun aliasForBadNames(): PipelineElement<Metadata, Metadata> =
@@ -61,7 +62,7 @@ object Pipelines {
 
 
     private class DataParser(val path: String, val limit: Long)
-        :PipelineElement<Class<*>, DataRepository>
+        :PipelineElement<Class<GeneratedClass>, DataRepository>
     ({ clazz ->
         val reader = BufferedReader(FileReader(path))
         val gson = Gson()

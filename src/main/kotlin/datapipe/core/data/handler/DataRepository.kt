@@ -1,5 +1,6 @@
 package datapipe.core.data.handler
 
+import datapipe.core.data.generator.GeneratedClass
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.lang.reflect.Field
@@ -8,8 +9,8 @@ import java.lang.reflect.Field
  * @author: andrei shlykov
  * @since: 27.01.2018
  */
-class DataRepository(val containsClass: Class<*>,
-                     private val values: MutableList<Any>): Iterable<Any> {
+class DataRepository(val containsClass: Class<GeneratedClass>,
+                     private val values: MutableList<GeneratedClass>): Iterable<GeneratedClass> {
 
     val size get() = this.values.size
 
