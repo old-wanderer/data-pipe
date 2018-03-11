@@ -1,6 +1,9 @@
 package datapipe.core.data.handler
 
 import datapipe.core.data.generator.GeneratedClass
+import datapipe.core.data.generator.metadata
+import datapipe.core.data.model.metadata.MetadataClass
+import datapipe.core.data.model.metadata.MetadataList
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.lang.reflect.Field
@@ -49,7 +52,26 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
 
     override fun iterator() = values.iterator()
 
-    private fun getIncludedFields(excluded: List<String> = emptyList()): List<Field> =
-            containsClass.fields.toList()
+    fun getIncludedFields(excluded: List<String> = emptyList()): List<Field> {
+        val paths = metadataPropertiesPaths(containsClass.metadata())
+        println(paths)
+        return containsClass.fields.toList()
+    }
+
+    private fun merge(prefix: String, name: String) = if (prefix == "") name else "$prefix.$name"
+
+    private fun metadataPropertiesPaths(metadataClass: MetadataClass, prefix: String = ""): List<String> {
+        val result = mutableListOf<String>()
+        for (child in metadataClass.properties) {
+            val childPaths = when {
+                child.type is MetadataClass -> metadataPropertiesPaths(child.type, merge(prefix, child.name))
+                child.type is MetadataList && child.type.containsType is MetadataClass ->
+                    metadataPropertiesPaths(child.type.containsType, merge(prefix, child.name))
+                else -> listOf(merge(prefix, child.name))
+            }
+            result.addAll(childPaths)
+        }
+        return result
+    }
 
 }
