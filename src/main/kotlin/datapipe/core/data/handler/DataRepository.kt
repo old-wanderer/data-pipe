@@ -2,11 +2,9 @@ package datapipe.core.data.handler
 
 import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.generator.metadata
-import datapipe.core.data.model.metadata.MetadataClass
-import datapipe.core.data.model.metadata.MetadataList
+import datapipe.core.data.model.metadata.metadataPropertiesPaths
 import java.io.BufferedWriter
 import java.io.FileWriter
-import java.lang.reflect.Field
 
 /**
  * @author: andrei shlykov
@@ -22,14 +20,15 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
 
     operator fun get(index: Int) = values[index]
 
+    // TODO test
     fun saveToCSV(path: String) {
         BufferedWriter(FileWriter(path)).use {
-            val fields = getIncludedFields()
-            it.write(fields.joinToString(";", transform = Field::getName))
+            val paths = getIncludedFields()
+            it.write(paths.joinToString(";"))
             it.newLine()
 
             for (value in values) {
-                it.write(fields.joinToString(";", transform = { "\"${it.get(value)}\"" }))
+                it.write(paths.joinToString(";", transform = { "\"${value.getPropertyValue(it)}\"" }))
                 it.newLine()
             }
         }
@@ -52,26 +51,7 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
 
     override fun iterator() = values.iterator()
 
-    fun getIncludedFields(excluded: List<String> = emptyList()): List<Field> {
-        val paths = metadataPropertiesPaths(containsClass.metadata())
-        println(paths)
-        return containsClass.fields.toList()
-    }
-
-    private fun merge(prefix: String, name: String) = if (prefix == "") name else "$prefix.$name"
-
-    private fun metadataPropertiesPaths(metadataClass: MetadataClass, prefix: String = ""): List<String> {
-        val result = mutableListOf<String>()
-        for (child in metadataClass.properties) {
-            val childPaths = when {
-                child.type is MetadataClass -> metadataPropertiesPaths(child.type, merge(prefix, child.name))
-                child.type is MetadataList && child.type.containsType is MetadataClass ->
-                    metadataPropertiesPaths(child.type.containsType, merge(prefix, child.name))
-                else -> listOf(merge(prefix, child.name))
-            }
-            result.addAll(childPaths)
-        }
-        return result
-    }
+    private fun getIncludedFields(excluded: List<String> = emptyList()): List<String> =
+            metadataPropertiesPaths(containsClass.metadata()) - excluded
 
 }
