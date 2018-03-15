@@ -1,4 +1,4 @@
-package datapipe.core.data.pipeline
+package datapipe.core.pipeline
 
 import datapipe.core.data.generator.ClassGenerator
 import datapipe.core.data.handler.DataRepository
@@ -54,14 +54,14 @@ object Pipelines {
             }
 
     fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
-        PipelineElement({
-            task(it)
-            it!!
-        })
+            PipelineElement({
+                task(it)
+                it!!
+            })
 
 
     private class DataParser(val path: String, val limit: Long)
-        :PipelineElement<Class<*>, DataRepository>
+        : PipelineElement<Class<*>, DataRepository>
     ({ clazz ->
         val reader = BufferedReader(FileReader(path))
         val gson = Gson()

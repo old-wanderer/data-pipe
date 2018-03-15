@@ -43,7 +43,7 @@ class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadat
 
     override fun toString() = prettyString()
 }
-
+// i don now that i do
 data class PropertyMetadata(val name: String,
                             val type: MetadataType,
                             val aliasNames: Set<String> = emptySet()): Metadata() {

@@ -1,4 +1,4 @@
-package datapipe.cli
+package datapipe.examples
 
 import datapipe.core.data.generator.ClassGenerator
 import datapipe.core.data.model.metadata.*

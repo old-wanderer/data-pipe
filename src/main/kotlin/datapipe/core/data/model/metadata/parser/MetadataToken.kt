@@ -1,6 +1,6 @@
 package datapipe.core.data.model.metadata.parser
 
-import datapipe.core.data.common.Visited
+import datapipe.core.common.Visited
 import datapipe.core.data.model.metadata.Metadata
 import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.MetadataList

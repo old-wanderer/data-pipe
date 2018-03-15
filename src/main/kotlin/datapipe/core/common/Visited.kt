@@ -1,4 +1,4 @@
-package datapipe.core.data.common
+package datapipe.core.common
 
 /**
  * @author: Andrei Shlykov

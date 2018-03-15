@@ -1,7 +1,7 @@
-package datapipe.cli
+package datapipe.examples
 
 import datapipe.core.data.generator.GeneratedClass
-import datapipe.core.data.pipeline.*
+import datapipe.core.pipeline.Pipelines
 import java.lang.reflect.Field
 
 

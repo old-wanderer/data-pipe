@@ -1,4 +1,4 @@
-package datapipe.core.data.handler
+package datapipe.core.data.model
 
 import java.io.BufferedWriter
 import java.io.FileWriter

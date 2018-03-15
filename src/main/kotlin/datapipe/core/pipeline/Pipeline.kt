@@ -1,4 +1,4 @@
-package datapipe.core.data.pipeline
+package datapipe.core.pipeline
 
 /**
  * @author: Andrei Shlykov
