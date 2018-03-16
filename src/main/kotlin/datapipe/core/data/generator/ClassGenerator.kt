@@ -33,6 +33,9 @@ object ClassGenerator {
 
     fun generateClass(metadata: MetadataClass): Class<GeneratedClass> {
         val className = "datapipe/core/data/generated/${genClassName()}"
+
+        println("generate class with name : $className")
+
         val byteCode = generateByteCode(className, metadata)
         return loadClass(className, byteCode)
     }

@@ -21,6 +21,14 @@ fun main(args: Array<String>) {
         }
     }
 
-    ClassGenerator.generateClassAndSave(metadata, "./work_output/GenerateClassAndSave/Example0.class")
+
+//    ClassGenerator.generateClassAndSave(metadata, "./work_output/GenerateClassAndSave/Example0.class")
+    println("-----------------------------")
+    metadata.generatedClass
+    metadata.generatedClass
+    metadata.generatedClass
+
+    println("-----------------------------")
+    (metadata.properties.find { it.name == "p3" }!!.type as MetadataClass).generatedClass
 
 }
