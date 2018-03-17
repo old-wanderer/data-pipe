@@ -121,7 +121,7 @@ object ClassGenerator {
             is MetadataList -> classWriter.visitField(Opcodes.ACC_PUBLIC,
                     propertyMetadata.name, Type.getDescriptor(List::class.java), getRealType(propertyMetadata.type), null)
             is MetadataClass -> {
-                val clazz = generateClass(propertyMetadata.type)
+                val clazz = propertyMetadata.type.generatedClass
                 classWriter.visitField(Opcodes.ACC_PUBLIC, propertyMetadata.name,
                         Type.getDescriptor(clazz), null, null)
             }
@@ -147,7 +147,7 @@ object ClassGenerator {
         PrimitiveDouble  -> if (maybePrimitive) Type.DOUBLE_TYPE.descriptor  else "Ljava/lang/Double;"
         PrimitiveBoolean -> if (maybePrimitive) Type.BOOLEAN_TYPE.descriptor else "Ljava/lang/Boolean;"
         PrimitiveLong    -> if (maybePrimitive) Type.LONG_TYPE.descriptor    else "Ljava/lang/Long;"
-        is MetadataClass -> Type.getDescriptor(generateClass(metadata))
+        is MetadataClass -> Type.getDescriptor(metadata.generatedClass)
         is MetadataList  -> "Ljava/util/List<${getRealType(metadata.containsType)}>;"
         else -> throw RuntimeException("Don't know type: $metadata")
     }

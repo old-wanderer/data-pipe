@@ -25,7 +25,7 @@ object Pipelines {
             ModelExtractor(path, limit)
 
     fun generateClass(): PipelineElement<Metadata, Class<GeneratedClass>> =
-            PipelineElement { ClassGenerator.generateClass(it as MetadataClass) }
+            PipelineElement { (it as MetadataClass).generatedClass }
 
     fun parseData(path: String, limit: Long = -1): PipelineElement<Class<GeneratedClass>, DataRepository> =
             DataParser(path, limit)

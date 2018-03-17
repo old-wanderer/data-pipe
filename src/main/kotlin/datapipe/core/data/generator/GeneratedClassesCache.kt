@@ -18,4 +18,6 @@ object GeneratedClassesCache: ReadOnlyProperty<MetadataClass, Class<GeneratedCla
 
     override fun getValue(thisRef: MetadataClass, property: KProperty<*>): Class<GeneratedClass> = get(thisRef)
 
+    fun clear() = cache.clear()
+
 }
