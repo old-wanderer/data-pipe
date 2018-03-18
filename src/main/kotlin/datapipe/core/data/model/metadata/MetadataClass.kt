@@ -1,10 +1,15 @@
 package datapipe.core.data.model.metadata
 
+import datapipe.core.data.generator.GeneratedClass
+import datapipe.core.data.generator.GeneratedClassesCache
+
 /**
  * @author: Andrei Shlykov
  * @since: 31.01.2018
  */
 class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): MetadataType() {
+
+    val generatedClass: Class<GeneratedClass> by GeneratedClassesCache
 
     override fun combine(other: Metadata): Metadata = when(other) {
         is MetadataClass -> {

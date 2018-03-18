@@ -1,15 +1,17 @@
 package datapipe.core.data.handler
 
+import datapipe.core.data.generator.GeneratedClass
+import datapipe.core.data.generator.metadata
+import datapipe.core.data.model.metadata.metadataPropertiesPaths
 import java.io.BufferedWriter
 import java.io.FileWriter
-import java.lang.reflect.Field
 
 /**
  * @author: andrei shlykov
  * @since: 27.01.2018
  */
-class DataRepository(val containsClass: Class<*>,
-                     private val values: MutableList<Any>): Iterable<Any> {
+class DataRepository(val containsClass: Class<GeneratedClass>,
+                     private val values: MutableList<GeneratedClass>): Iterable<GeneratedClass> {
 
     val size get() = this.values.size
 
@@ -18,14 +20,15 @@ class DataRepository(val containsClass: Class<*>,
 
     operator fun get(index: Int) = values[index]
 
+    // TODO test
     fun saveToCSV(path: String) {
         BufferedWriter(FileWriter(path)).use {
-            val fields = getIncludedFields()
-            it.write(fields.joinToString(";", transform = Field::getName))
+            val paths = getIncludedFields()
+            it.write(paths.joinToString(";"))
             it.newLine()
 
             for (value in values) {
-                it.write(fields.joinToString(";", transform = { "\"${it.get(value)}\"" }))
+                it.write(paths.joinToString(";", transform = { "\"${value.getPropertyValue(it)}\"" }))
                 it.newLine()
             }
         }
@@ -48,7 +51,7 @@ class DataRepository(val containsClass: Class<*>,
 
     override fun iterator() = values.iterator()
 
-    private fun getIncludedFields(excluded: List<String> = emptyList()): List<Field> =
-            containsClass.fields.toList()
+    private fun getIncludedFields(excluded: List<String> = emptyList()): List<String> =
+            metadataPropertiesPaths(containsClass.metadata()) - excluded
 
 }

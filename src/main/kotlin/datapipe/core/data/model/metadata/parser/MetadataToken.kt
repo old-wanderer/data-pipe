@@ -7,6 +7,7 @@ import datapipe.core.data.model.metadata.MetadataList
 import datapipe.core.data.model.metadata.MetadataPrimitive
 import datapipe.core.data.model.metadata.PropertyMetadata
 import datapipe.core.data.model.metadata.MetadataType
+import kotlin.coroutines.experimental.buildSequence
 
 /**
  * @author: Andrei Shlykov
@@ -37,6 +38,15 @@ abstract class MetadataAstNode(val parent: MetadataAstNode? = null)
     val children = LinkedHashSet<MetadataAstNode>()
 
     override fun iterator(): Iterator<MetadataAstNode> = BfsTreeIterator(this)
+
+    fun levelOrderIterator(): Iterator<MetadataAstNode> = BfsTreeIterator(this)
+
+    fun postOrderIterator(): Iterator<MetadataAstNode> = buildSequence {
+        for (child in children) {
+            yieldAll(child.postOrderIterator().asSequence().toList())
+        }
+        yield(this@MetadataAstNode)
+    }.iterator()
 
 }
 

@@ -6,6 +6,7 @@ import datapipe.core.data.model.metadata.*
 import datapipe.core.data.model.metadata.parser.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.Metadata
 import datapipe.core.data.model.metadata.MetadataType
 import datapipe.core.data.model.metadata.PrimitiveNull
@@ -23,15 +24,14 @@ object Pipelines {
     fun extractModelFrom(path: String, limit: Long = -1): PipelineElement<Unit, Metadata> =
             ModelExtractor(path, limit)
 
-    fun generateClass(): PipelineElement<Metadata, Class<*>> =
-            PipelineElement { ClassGenerator.generateClass(it as MetadataClass) }
+    fun generateClass(): PipelineElement<Metadata, Class<GeneratedClass>> =
+            PipelineElement { (it as MetadataClass).generatedClass }
 
-    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<*>, DataRepository> =
+    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<GeneratedClass>, DataRepository> =
             DataParser(path, limit)
 
     fun aliasForBadNames(): PipelineElement<Metadata, Metadata> =
             PipelineElement { source ->
-
                 if (source is MetadataClass) {
                     val root = buildMetadataAstTree(tokenize(source).toList())
                     val visitor = AliasForBadNameVisitor()
@@ -43,31 +43,16 @@ object Pipelines {
             }
 
     fun removeUnnecessaryProperties(): PipelineElement<Metadata, Metadata> =
-            PipelineElement {
-                if (it is MetadataClass) {
-                    val ast = buildMetadataAstTree(tokenize(it).toList())
-                    dfsMetadataAst(ast)
-                    return@PipelineElement buildMetadata(ast)
+            PipelineElement { source ->
+                if (source is MetadataClass) {
+                    val root = buildMetadataAstTree(tokenize(source).toList())
+                    val visitor = RemoveUnnecessaryPropertiesVisitor()
+                    root.postOrderIterator().forEach { it.visit(visitor) }
+                    buildMetadata(root)
+                } else {
+                    source!!
                 }
-                it!!
             }
-
-    private fun dfsMetadataAst(node: MetadataAstNode) {
-        node.children.removeIf {
-            dfsMetadataAst(it)
-            unnecessaryPropertiesPredicateNode(it)
-        }
-    }
-
-    private fun unnecessaryPropertiesPredicateNode(node: MetadataAstNode): Boolean = when (node) {
-        is MetadataPropertyNode -> node.type == null
-        is MetadataListNode -> node.containedType == null
-
-        is MetadataClassNode -> node.properties.isEmpty()
-        is MetadataPrimitiveNode -> node.type == PrimitiveNull
-
-        else -> false
-    }
 
     fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
         PipelineElement({
@@ -77,7 +62,7 @@ object Pipelines {
 
 
     private class DataParser(val path: String, val limit: Long)
-        :PipelineElement<Class<*>, DataRepository>
+        :PipelineElement<Class<GeneratedClass>, DataRepository>
     ({ clazz ->
         val reader = BufferedReader(FileReader(path))
         val gson = Gson()
@@ -126,6 +111,30 @@ object Pipelines {
                 node.children.removeIf { true }
                 node.children.addAll(newChildren)
             }
+        }
+    }
+
+    // TODO расширать предикат для удаления
+    private class RemoveUnnecessaryPropertiesVisitor: MetadataAstNodeVisitor {
+
+        private fun isUnnecessaryNode(node: MetadataAstNode) = when (node) {
+            is MetadataPropertyNode -> node.type == null
+            is MetadataListNode -> node.containedType == null
+            is MetadataClassNode -> node.properties.isEmpty()
+            is MetadataPrimitiveNode -> node.type == PrimitiveNull
+            else -> false
+        }
+
+        override fun visitMetadataClassNode(node: MetadataClassNode) {
+            node.children.removeIf(this::isUnnecessaryNode)
+        }
+
+        override fun visitMetadataListNode(node: MetadataListNode) {
+            node.children.removeIf(this::isUnnecessaryNode)
+        }
+
+        override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
+            node.children.removeIf(this::isUnnecessaryNode)
         }
     }
 

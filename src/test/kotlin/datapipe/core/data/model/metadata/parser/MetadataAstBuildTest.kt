@@ -1,5 +1,7 @@
 package datapipe.core.data.model.metadata.parser
 
+import com.sun.tools.hat.internal.model.Root
+import datapipe.core.data.model.metadata.MetadataPrimitive
 import datapipe.core.data.model.metadata.PrimitiveString
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -146,4 +148,40 @@ class MetadataAstBuildTest {
 
     }
 
+
+    // TODO перенести тест
+    // TODO тест может легко сломаться, хотя вариант прохода будет правильный
+    //      надо проверять, что узел посещается, если все дети были посещены ранее
+    @Test
+    fun postOrderTreeIteratorTest() {
+        val root = RootNode()
+        val child1 = MetadataClassNode(root)
+        val child1_1 = MetadataPropertyNode(child1)
+        val child1_2 = MetadataPropertyNode(child1)
+        val child1_3 = MetadataPropertyNode(child1)
+
+        val child1_1_1 = MetadataPropertyNameNode("child1_1_1", child1_1)
+        val child1_1_2 = MetadataPrimitiveNode(PrimitiveString, child1_1)
+
+        val child1_2_1 = MetadataPropertyNameNode("child1_2_1", child1_2)
+        val child1_2_2 = MetadataListNode(child1_2)
+        val child1_2_2_1 = MetadataPrimitiveNode(PrimitiveString, child1_2_2)
+
+        val child1_3_1 = MetadataPropertyNameNode("child1_3_1", child1_3)
+        val child1_3_2 = MetadataClassNode(child1_3)
+        val child1_3_2_1 = MetadataPropertyNameNode("child1_3_2_1", child1_3_2)
+        val child1_3_2_2 = MetadataPrimitiveNode(PrimitiveString, child1_3_2)
+
+        val lst = listOf(
+                child1_1_1, child1_1_2, child1_1,
+                child1_2_1, child1_2_2_1, child1_2_2, child1_2,
+                child1_3_1, child1_3_2_1, child1_3_2_2, child1_3_2, child1_3,
+                child1, root
+        )
+
+        for ((index, node) in  root.postOrderIterator().withIndex()) {
+            Assertions.assertEquals(lst[index], node, "index: $index")
+        }
+
+    }
 }

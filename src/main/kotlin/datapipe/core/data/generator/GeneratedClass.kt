@@ -1,10 +1,19 @@
 package datapipe.core.data.generator
 
+import datapipe.core.data.model.metadata.MetadataClass
+import datapipe.core.data.model.metadata.metadataClass
+
 /**
  * @author: Andrei Shlykov
  * @since: 14.02.2018
  */
 abstract class GeneratedClass {
+
+
+    companion object {
+        @JvmField
+        val _metadata: MetadataClass = metadataClass {  }
+    }
 
     fun getPropertyValue(propertyNameChain: String): Any? {
         if (propertyNameChain.isNotBlank()) {
@@ -30,4 +39,8 @@ abstract class GeneratedClass {
         return field.get(this)
     }
 
+}
+
+fun Class<out GeneratedClass>.metadata(): MetadataClass {
+    return this.getField("_metadata").get(null) as MetadataClass
 }
