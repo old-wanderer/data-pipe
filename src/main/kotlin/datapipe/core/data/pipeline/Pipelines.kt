@@ -54,6 +54,18 @@ object Pipelines {
                 }
             }
 
+    fun excludeNamesFromMetadata(vararg names: String): PipelineElement<Metadata, Metadata> =
+            PipelineElement { source ->
+                if (source is MetadataClass) {
+                    val root = buildMetadataAstTree(tokenize(source).toList())
+                    val visitor = RemovePropertiesByNameVisitor(names.toSet())
+                    root.postOrderIterator().forEach { it.visit(visitor) }
+                    buildMetadata(root)
+                } else {
+                    source!!
+                }
+            }
+
     fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
         PipelineElement({
             task(it)
@@ -135,6 +147,15 @@ object Pipelines {
 
         override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
             node.children.removeIf(this::isUnnecessaryNode)
+        }
+    }
+
+    private class RemovePropertiesByNameVisitor(val names: Set<String>): MetadataAstNodeVisitor {
+
+        override fun visitMetadataClassNode(node: MetadataClassNode) {
+            node.children.removeIf { propertyNode ->
+                (propertyNode as MetadataPropertyNode).names.any { it.name in names }
+            }
         }
     }
 
