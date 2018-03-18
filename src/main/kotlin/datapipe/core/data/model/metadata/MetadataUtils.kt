@@ -16,9 +16,9 @@ import com.google.gson.JsonElement
  */
 fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
     jsonElement.isJsonObject -> {
-        val properties = mutableSetOf<PropertyMetadata>()
+        val properties = mutableSetOf<MetadataProperty>()
         for ((key, value) in jsonElement.asJsonObject.entrySet()) {
-            properties.add(PropertyMetadata(key, constructMetadataFromJson(value)))
+            properties.add(MetadataProperty(key, constructMetadataFromJson(value)))
         }
         MetadataClass(properties)
     }

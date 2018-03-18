@@ -11,7 +11,7 @@ class MetadataBuilderTest {
 
     @Test
     fun buildMetadataClassWithAliases() {
-        val expected = MetadataClass(setOf(PropertyMetadata("prop1", PrimitiveString, setOf("/badName1"))))
+        val expected = MetadataClass(setOf(MetadataProperty("prop1", PrimitiveString, setOf("/badName1"))))
         val metadata = metadataClass {
             + ("prop1" or "/badName1" to PrimitiveString)
         }

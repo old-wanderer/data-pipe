@@ -12,12 +12,12 @@ class MetadataTokenizeTest {
 
     @Test
     fun allPropsVisit() {
-        val p0 = PropertyMetadata("p0", PrimitiveLong)
-        val p1 = PropertyMetadata("p1", PrimitiveString)
-        val p2 = PropertyMetadata("p2", PrimitiveBoolean)
-        val p4 = PropertyMetadata("p4", PrimitiveString)
-        val p5 = PropertyMetadata("p5", PrimitiveDouble)
-        val p3 = PropertyMetadata("p3", MetadataClass(setOf(p4, p5)))
+        val p0 = MetadataProperty("p0", PrimitiveLong)
+        val p1 = MetadataProperty("p1", PrimitiveString)
+        val p2 = MetadataProperty("p2", PrimitiveBoolean)
+        val p4 = MetadataProperty("p4", PrimitiveString)
+        val p5 = MetadataProperty("p5", PrimitiveDouble)
+        val p3 = MetadataProperty("p3", MetadataClass(setOf(p4, p5)))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
                     PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(p0.type as MetadataPrimitive),
@@ -39,12 +39,12 @@ class MetadataTokenizeTest {
 
     @Test
     fun preorderTest() {
-        val p0 = PropertyMetadata("p0", PrimitiveLong)
-        val p1 = PropertyMetadata("p1", PrimitiveString)
-        val p2 = PropertyMetadata("p2", PrimitiveBoolean)
-        val p4 = PropertyMetadata("p4", PrimitiveString)
-        val p5 = PropertyMetadata("p5", PrimitiveDouble)
-        val p3 = PropertyMetadata("p3", MetadataClass(setOf(p4, p5)))
+        val p0 = MetadataProperty("p0", PrimitiveLong)
+        val p1 = MetadataProperty("p1", PrimitiveString)
+        val p2 = MetadataProperty("p2", PrimitiveBoolean)
+        val p4 = MetadataProperty("p4", PrimitiveString)
+        val p5 = MetadataProperty("p5", PrimitiveDouble)
+        val p3 = MetadataProperty("p3", MetadataClass(setOf(p4, p5)))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
                     PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(p0.type as MetadataPrimitive),
@@ -64,10 +64,10 @@ class MetadataTokenizeTest {
 
     @Test
     fun withListTest() {
-        val p0 = PropertyMetadata("p0", PrimitiveLong)
-        val p4 = PropertyMetadata("p4", PrimitiveString)
-        val p5 = PropertyMetadata("p5", PrimitiveDouble)
-        val p3 = PropertyMetadata("p3", MetadataList(MetadataClass(setOf(p4, p5))))
+        val p0 = MetadataProperty("p0", PrimitiveLong)
+        val p4 = MetadataProperty("p4", PrimitiveString)
+        val p5 = MetadataProperty("p5", PrimitiveDouble)
+        val p3 = MetadataProperty("p3", MetadataList(MetadataClass(setOf(p4, p5))))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
                     PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(PrimitiveLong),
@@ -88,8 +88,8 @@ class MetadataTokenizeTest {
 
     @Test
     fun withListOfPrimitiveTest() {
-        val p0 = PropertyMetadata("p0", PrimitiveLong)
-        val p3 = PropertyMetadata("p3", MetadataList(PrimitiveString))
+        val p0 = MetadataProperty("p0", PrimitiveLong)
+        val p3 = MetadataProperty("p3", MetadataList(PrimitiveString))
         val expectedTokens = mutableListOf(
                 ObjectBegin,
                     PropertyNameToken(p0.name), TypeSeparator, PrimitiveToken(PrimitiveLong),

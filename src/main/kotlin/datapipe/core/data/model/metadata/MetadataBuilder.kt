@@ -7,20 +7,20 @@ package datapipe.core.data.model.metadata
 
 class MetadataClassBuilder {
 
-    private val properties = mutableSetOf<PropertyMetadata>()
+    private val properties = mutableSetOf<MetadataProperty>()
 
     operator fun MetadataType.unaryPlus() {
-        properties.add(PropertyMetadata("p${properties.size}", this))
+        properties.add(MetadataProperty("p${properties.size}", this))
     }
 
     @JvmName("addProperty")
     operator fun Pair<String, MetadataType>.unaryPlus() {
-        properties.add(PropertyMetadata(this.first, this.second))
+        properties.add(MetadataProperty(this.first, this.second))
     }
 
     @JvmName("addPropertyWithAlias")
     operator fun Pair<List<String>, MetadataType>.unaryPlus() {
-        properties.add(PropertyMetadata(this.first.first(), this.second, this.first.drop(1).toSet()))
+        properties.add(MetadataProperty(this.first.first(), this.second, this.first.drop(1).toSet()))
     }
 
     infix fun String.or(alias: String): List<String> = listOf(this, alias)

@@ -114,28 +114,28 @@ object ClassGenerator {
         staticConstructor.visitEnd()
     }
 
-    private fun genProperty(propertyMetadata: PropertyMetadata, classWriter: ClassWriter) {
-        val field = when (propertyMetadata.type) {
+    private fun genProperty(metadataProperty: MetadataProperty, classWriter: ClassWriter) {
+        val field = when (metadataProperty.type) {
             is MetadataPrimitive -> classWriter.visitField(Opcodes.ACC_PUBLIC,
-                    propertyMetadata.name, getRealType(propertyMetadata.type, maybePrimitive = true), null, null)
+                    metadataProperty.name, getRealType(metadataProperty.type, maybePrimitive = true), null, null)
             is MetadataList -> classWriter.visitField(Opcodes.ACC_PUBLIC,
-                    propertyMetadata.name, Type.getDescriptor(List::class.java), getRealType(propertyMetadata.type), null)
+                    metadataProperty.name, Type.getDescriptor(List::class.java), getRealType(metadataProperty.type), null)
             is MetadataClass -> {
-                val clazz = propertyMetadata.type.generatedClass
-                classWriter.visitField(Opcodes.ACC_PUBLIC, propertyMetadata.name,
+                val clazz = metadataProperty.type.generatedClass
+                classWriter.visitField(Opcodes.ACC_PUBLIC, metadataProperty.name,
                         Type.getDescriptor(clazz), null, null)
             }
             else -> {
-                println("WARNING: cant create property not primitive type: ${propertyMetadata.type}")
+                println("WARNING: cant create property not primitive type: ${metadataProperty.type}")
                 return
             }
         }
         // TODO тест на генерацию SerializedName
-        if (propertyMetadata.aliasNames.isNotEmpty()) {
+        if (metadataProperty.aliasNames.isNotEmpty()) {
             val annotation = field.visitAnnotation(Type.getDescriptor(SerializedName::class.java), true)
-            annotation.visit("value", propertyMetadata.aliasNames.first())
-            if (propertyMetadata.aliasNames.size > 1) {
-                annotation.visit("alternate", propertyMetadata.aliasNames.drop(1).toTypedArray())
+            annotation.visit("value", metadataProperty.aliasNames.first())
+            if (metadataProperty.aliasNames.size > 1) {
+                annotation.visit("alternate", metadataProperty.aliasNames.drop(1).toTypedArray())
             }
             annotation.visitEnd()
         }
