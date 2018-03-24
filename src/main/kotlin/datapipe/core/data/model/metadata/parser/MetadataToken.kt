@@ -7,6 +7,7 @@ import datapipe.core.data.model.metadata.MetadataList
 import datapipe.core.data.model.metadata.MetadataPrimitive
 import datapipe.core.data.model.metadata.MetadataProperty
 import datapipe.core.data.model.metadata.MetadataType
+import datapipe.core.data.model.metadata.parser.visitor.MetadataAstNodeVisitor
 import kotlin.coroutines.experimental.buildSequence
 
 /**

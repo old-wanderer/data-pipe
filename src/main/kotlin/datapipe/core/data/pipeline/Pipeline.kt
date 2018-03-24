@@ -27,7 +27,7 @@ open class PipelineElement<P, V>(private val task: (P?) -> V): AbstractPipelineE
 }
 
 
-infix fun <L, R> PipelineElement<*, L>.join(right: PipelineElement<*, R>): PipelineElement<Unit, Pair<L, R>> =
+infix fun <L, R> PipelineElement<*, L>.join(right: AbstractPipelineElement<*, R>): AbstractPipelineElement<Unit, Pair<L, R>> =
         PipelineElement { this.value to right.value }
 
-operator fun <T> T.plus(right: PipelineElement<T, *>) = PipelineElement<T, T> { this } + right
+operator fun <T> T.plus(right: AbstractPipelineElement<T, *>) = PipelineElement<T, T> { this } + right
