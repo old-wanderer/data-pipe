@@ -1,6 +1,5 @@
 package datapipe.core.data.pipeline
 
-import datapipe.core.data.generator.ClassGenerator
 import datapipe.core.data.handler.DataRepository
 import datapipe.core.data.model.metadata.*
 import datapipe.core.data.model.metadata.parser.*
@@ -21,13 +20,13 @@ import kotlin.collections.LinkedHashSet
  */
 object Pipelines {
 
-    fun extractModelFrom(path: String, limit: Long = -1): PipelineElement<Unit, Metadata> =
+    fun extractModelFrom(path: String, limit: Long = -1): AbstractPipelineElement<Unit, Metadata> =
             ModelExtractor(path, limit)
 
-    fun generateClass(): PipelineElement<Metadata, Class<GeneratedClass>> =
+    fun generateClass(): AbstractPipelineElement<Metadata, Class<GeneratedClass>> =
             PipelineElement { (it as MetadataClass).generatedClass }
 
-    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<GeneratedClass>, DataRepository> =
+    fun parseData(path: String, limit: Long = -1): AbstractPipelineElement<Class<GeneratedClass>, DataRepository> =
             DataParser(path, limit)
 
     fun aliasForBadNames(): PipelineElement<Metadata, Metadata> =
@@ -38,6 +37,8 @@ object Pipelines {
                     root.forEach { it.visit(visitor) }
                     buildMetadata(root)
                 } else {
+                    // TODO По сути это ошибка, так как операция нацелена на MetadataClass
+                    // возможно стоит возвращать Either<MetadataClass, BrokenPipe>
                     source!!
                 }
             }
@@ -67,41 +68,47 @@ object Pipelines {
             }
 
     fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
-        PipelineElement({
+        PipelineElement {
             task(it)
             it!!
-        })
-
+        }
 
     private class DataParser(val path: String, val limit: Long)
-        :PipelineElement<Class<GeneratedClass>, DataRepository>
-    ({ clazz ->
-        val reader = BufferedReader(FileReader(path))
-        val gson = Gson()
+        : AbstractPipelineElement<Class<GeneratedClass>, DataRepository>()
+    {
+        // TODO возможно стоит принимать Either<Class<GeneratedClass>, BrokenPipe>
+        override fun performTask(param: Class<GeneratedClass>?): DataRepository {
+            if (param == null) throw RuntimeException("param is null")
 
-        var stream = reader.lines()
-        if (limit > 0) {
-            stream = stream.limit(limit)
+            val reader = BufferedReader(FileReader(path))
+            val gson = Gson()
+
+            var stream = reader.lines()
+            if (limit > 0) {
+                stream = stream.limit(limit)
+            }
+            val lst = stream.map { str -> gson.fromJson(str, param) }.collect(Collectors.toList())
+
+            return DataRepository(param, lst)
         }
-        val lst = stream.map { str -> gson.fromJson(str, clazz) }.collect(Collectors.toList())
-
-        DataRepository(clazz!!, lst)
-    })
+    }
 
     private class ModelExtractor(val path: String, val limit: Long)
-        : PipelineElement<Unit, Metadata>
-    ({
-        val reader = BufferedReader(FileReader(path))
-        val parser = JsonParser()
+        : AbstractPipelineElement<Unit, Metadata>()
+    {
+        override fun performTask(param: Unit?): Metadata {
+            val reader = BufferedReader(FileReader(path))
+            val parser = JsonParser()
 
-        var stream = reader.lines()
-        if (limit > 0) {
-            stream = stream.limit(limit)
+            var stream = reader.lines()
+            if (limit > 0) {
+                stream = stream.limit(limit)
+            }
+            return stream
+                    .map { constructMetadataFromJson(parser.parse(it)) }
+                    .reduce(PrimitiveNull, MetadataType::combine)
         }
-        stream
-                .map { constructMetadataFromJson(parser.parse(it)) }
-                .reduce(PrimitiveNull, MetadataType::combine)
-    })
+    }
 
     // TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
     // по умаолчанию должно проверять корректность индетификатора в java
