@@ -103,6 +103,22 @@ class MetadataTokenizeTest {
     }
 
     @Test
+    fun withListOfListTest() {
+        val p3 = PropertyMetadata("p3", MetadataList(MetadataList(PrimitiveString)))
+        val expectedTokens = mutableListOf(
+                ObjectBegin,
+                    PropertyNameToken(p3.name), TypeSeparator, ListBegin,
+                        ListBegin, PrimitiveToken(PrimitiveString), ListEnd,
+                    ListEnd,
+                ObjectEnd)
+        val model = MetadataClass(setOf(p3))
+
+        for ((index, token) in tokenize(model).withIndex()) {
+            Assertions.assertEquals(expectedTokens[index], token) { "index: $index" }
+        }
+    }
+
+    @Test
     fun aliasNameTest() {
         val source = metadataClass {
             + ("p0" to PrimitiveLong)

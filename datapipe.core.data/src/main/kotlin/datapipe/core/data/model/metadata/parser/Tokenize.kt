@@ -47,17 +47,20 @@ fun tokenize(metadataClass: MetadataClass): Sequence<MetadataToken> = buildSeque
         when (property.type) {
             is MetadataPrimitive -> yield(PrimitiveToken(property.type))
             is MetadataClass -> yieldAll(tokenize(property.type))
-            is MetadataList -> {
-                yield(ListBegin)
-                when (property.type.containsType) {
-                    is MetadataPrimitive -> yield(PrimitiveToken(property.type.containsType))
-                    is MetadataClass -> yieldAll(tokenize(property.type.containsType))
-                    else -> throw RuntimeException("MetadataList contains unresolved type")
-                }
-                yield(ListEnd)
-            }
+            is MetadataList -> yieldAll(tokenize(property.type))
         }
 
     }
     yield(ObjectEnd)
+}
+
+private fun tokenize(metadataList: MetadataList): Sequence<MetadataToken> = buildSequence {
+    yield(ListBegin)
+    when (metadataList.containsType) {
+        is MetadataPrimitive -> yield(PrimitiveToken(metadataList.containsType))
+        is MetadataClass -> yieldAll(tokenize(metadataList.containsType))
+        is MetadataList -> yieldAll(tokenize(metadataList.containsType))
+        else -> throw RuntimeException("MetadataList contains unresolved type ${metadataList.containsType}")
+    }
+    yield(ListEnd)
 }
