@@ -9,8 +9,8 @@ import java.lang.reflect.Field
  * @author: andrei shlykov
  * @since: 21.01.2018
  */
-const val DATA_PREFIX = "./analyze_data/SEC_Rulemaking_"
-const val NEW_DATA = "./analyze_data/sec.rulemaking.json"
+const val DATA_PREFIX = "/Users/andrei/Downloads/SEC_Rulemaking/SEC_Rulemaking_"
+const val NEW_DATA = "/Users/andrei/Downloads/SEC_Rulemaking/sec.rulemaking.json"
 const val DOCUMENT_HISTORY_DATA = "${DATA_PREFIX}document_history.json"
 const val DOCUMENTS_DATA = "${DATA_PREFIX}documents.json"
 const val EVENT_HISTORY_DATA = "${DATA_PREFIX}event_history.json"
@@ -21,7 +21,7 @@ const val POSTS_DATA = "${DATA_PREFIX}posts.json"
 
 fun scenario1(path: String) =
         (Pipelines.extractModelFrom(path, 10)
-        + Pipelines.removeUnnecessaryProperties()
+//        + Pipelines.removeUnnecessaryProperties()
         + Pipelines.aliasForBadNames()
         + Pipelines.process(System.out::println)
         + Pipelines.generateClass()

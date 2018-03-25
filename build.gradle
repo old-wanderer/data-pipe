@@ -1,4 +1,5 @@
 buildscript {
+    ext.module_name = 'datapipe.examples'
     ext.kotlin_version = '1.2.30'
     ext.junit_platform_version = '1.0.3'
     ext.junit_jupiter_version = '5.0.3'
@@ -17,6 +18,8 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
 
+sourceCompatibility = 1.9
+
 repositories {
     mavenCentral()
 }
@@ -25,6 +28,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+    compile group: 'org.ow2.asm', name: 'asm', version: '6.0'
 
     testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.1.0-M1'
@@ -37,4 +41,40 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+compileJava {
+    inputs.property("moduleName", module_name)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}
+
+compileTestJava {
+    inputs.property("moduleName", module_name)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'junit',
+                '--add-reads', "$module_name=junit",
+                '--patch-module', "$module_name=" + files(sourceSets.test.java.srcDirs).asPath,
+        ]
+        classpath = files()
+    }
+}
+
+test {
+    inputs.property("moduleName", module_name)
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'ALL-MODULE-PATH',
+                '--add-reads', "$module_name=junit",
+                '--patch-module', "$module_name=" + files(sourceSets.test.java.outputDir).asPath,
+        ]
+        classpath = files()
+    }
 }
