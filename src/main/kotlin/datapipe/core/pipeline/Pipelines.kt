@@ -1,7 +1,7 @@
 package datapipe.core.pipeline
 
 import datapipe.core.data.generator.ClassGenerator
-import datapipe.core.data.handler.DataRepository
+import datapipe.core.data.model.DataRepository
 import datapipe.core.data.model.metadata.*
 import datapipe.core.data.model.metadata.parser.*
 import com.google.gson.Gson

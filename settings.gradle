@@ -1,2 +1,2 @@
 rootProject.name = 'abm.rnd'
-
+include 'datapipe.core.data'

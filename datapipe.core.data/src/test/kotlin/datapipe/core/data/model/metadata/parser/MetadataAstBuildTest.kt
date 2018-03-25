@@ -1,7 +1,5 @@
 package datapipe.core.data.model.metadata.parser
 
-import com.sun.tools.hat.internal.model.Root
-import datapipe.core.data.model.metadata.MetadataPrimitive
 import datapipe.core.data.model.metadata.PrimitiveString
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
