@@ -1,2 +1,3 @@
 rootProject.name = 'abm.rnd'
 include 'datapipe.core.data'
+include 'datapipe.core.pipeline'

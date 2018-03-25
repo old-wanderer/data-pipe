@@ -1,4 +1,4 @@
-module abm.rnd {
+module datapipe.core.pipeline.test {
 
     requires datapipe.core.data;
     requires datapipe.core.pipeline;
@@ -7,8 +7,7 @@ module abm.rnd {
     requires kotlin.stdlib;
     requires org.objectweb.asm;
     requires gson;
+    requires org.junit.jupiter.api;
 
-    // Требует gson. TODO Тоже странная история, вроде gson использует auto-module
-    requires java.sql;
 
 }

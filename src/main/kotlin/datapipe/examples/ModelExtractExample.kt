@@ -21,7 +21,7 @@ const val POSTS_DATA = "${DATA_PREFIX}posts.json"
 
 fun scenario1(path: String) =
         (Pipelines.extractModelFrom(path, 10)
-//        + Pipelines.removeUnnecessaryProperties()
+        + Pipelines.removeUnnecessaryProperties()
         + Pipelines.aliasForBadNames()
         + Pipelines.process(System.out::println)
         + Pipelines.generateClass()
