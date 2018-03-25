@@ -5,48 +5,29 @@ package datapipe.core.pipeline
  * @since: 31.01.2018
  */
 
-open class PipelineElement<P, V>(private val task: (P?) -> V) {
+abstract class AbstractPipelineElement<P, V> {
 
-    open val value: V by lazy { task(previous?.value) }
+    open val value: V by lazy { performTask(previous?.value) }
 
-    var previous: PipelineElement<*, P>? = null
+    protected var previous: AbstractPipelineElement<*, P>? = null
 
-    open operator fun <T> plus(other: PipelineElement<V, T>): PipelineElement<V, T> {
-        other.previous = this
-        return other
-    }
+    protected abstract fun performTask(param: P?): V
 
-    operator fun <R> plus(other: PipelineWithResult<V, R>): PipelineWithResult<V, R> {
+    open operator fun <T> plus(other: AbstractPipelineElement<V, T>): AbstractPipelineElement<V, T> {
         other.previous = this
         return other
     }
 
 }
 
-class PipelineWithResult<P, R>(private val resultTask: (P?) -> R): PipelineElement<P, P>( { it!! } ) {
+open class PipelineElement<P, V>(private val task: (P?) -> V): AbstractPipelineElement<P, V>() {
 
-    val result: R by lazy { resultTask(previous?.value) }
+    override fun performTask(param: P?): V = task(param)
 
-    operator fun <T> minus(other: PipelineResultHandler<P, T>): PipelineResultHandler<P, T> {
-        other.previous = this
-        return other
-    }
-}
-
-class PipelineResultHandler<P, R>(private val resultHandler: (R?) -> Unit): PipelineElement<P, P>({ it!! }) {
-
-    override val value: P by lazy {
-
-        if (previous is PipelineWithResult<*, *>) {
-            resultHandler((previous as PipelineWithResult<*, R>).result)
-        }
-
-        super.value
-    }
 }
 
 
-infix fun <L, R> PipelineElement<*, L>.join(right: PipelineElement<*, R>): PipelineElement<Unit, Pair<L, R>> =
+infix fun <L, R> PipelineElement<*, L>.join(right: AbstractPipelineElement<*, R>): AbstractPipelineElement<Unit, Pair<L, R>> =
         PipelineElement { this.value to right.value }
 
-operator fun <T> T.plus(right: PipelineElement<T, *>) = PipelineElement<T, T> { this } + right
+operator fun <T> T.plus(right: AbstractPipelineElement<T, *>) = PipelineElement<T, T> { this } + right

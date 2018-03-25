@@ -1,14 +1,19 @@
 package datapipe.core.data.model.metadata
 
+import datapipe.core.data.generator.GeneratedClass
+import datapipe.core.data.generator.GeneratedClassesCache
+
 /**
  * @author: Andrei Shlykov
  * @since: 31.01.2018
  */
-class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): MetadataType() {
+class MetadataClass(val properties: Set<MetadataProperty> = emptySet()): MetadataType() {
+
+    val generatedClass: Class<GeneratedClass> by GeneratedClassesCache
 
     override fun combine(other: Metadata): Metadata = when(other) {
         is MetadataClass -> {
-            val properties = HashMap<String, PropertyMetadata>(this.properties.size + other.properties.size)
+            val properties = HashMap<String, MetadataProperty>(this.properties.size + other.properties.size)
             properties.putAll(this.properties.map { Pair(it.name, it) })
 
             for (property in other.properties) {
@@ -28,7 +33,7 @@ class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadat
 
         return buildString {
             append("{\n")
-            properties.sortedBy(PropertyMetadata::name).forEach {
+            properties.sortedBy(MetadataProperty::name).forEach {
                 val aliases = if (it.aliasNames.isEmpty()) "" else it.aliasNames.joinToString(" | ", prefix=" (", postfix=")")
                 append("${"\t".repeat(depth+1)}%-${maxLength}s: %s%s\n"
                         .format(it.name, it.type.prettyString(depth+1), aliases))
@@ -42,19 +47,4 @@ class MetadataClass(val properties: Set<PropertyMetadata> = emptySet()): Metadat
     override fun hashCode() = properties.hashCode()
 
     override fun toString() = prettyString()
-}
-// i don now that i do
-data class PropertyMetadata(val name: String,
-                            val type: MetadataType,
-                            val aliasNames: Set<String> = emptySet()): Metadata() {
-
-    override fun combine(other: Metadata): PropertyMetadata = when (other) {
-        is PropertyMetadata -> PropertyMetadata(name, type combine other.type, aliasNames + other.aliasNames)
-        else -> throw TypesNotCombineException(type, other)
-    }
-
-    override fun prettyString(depth: Int): String {
-        val name = if (aliasNames.isEmpty()) name else "$name | ${aliasNames.joinToString(" | ")}"
-        return "${"\t".repeat(depth)}$name: ${type.prettyString(depth)}"
-    }
 }

@@ -5,8 +5,9 @@ import datapipe.core.data.model.metadata.Metadata
 import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.MetadataList
 import datapipe.core.data.model.metadata.MetadataPrimitive
-import datapipe.core.data.model.metadata.PropertyMetadata
+import datapipe.core.data.model.metadata.MetadataProperty
 import datapipe.core.data.model.metadata.MetadataType
+import datapipe.core.data.model.metadata.parser.visitor.MetadataAstNodeVisitor
 import kotlin.coroutines.experimental.buildSequence
 
 /**
@@ -167,9 +168,9 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
 
 fun buildMetadata(node: MetadataAstNode): Metadata = when (node) {
     is RootNode -> buildMetadata(node.child!!)
-    is MetadataClassNode -> MetadataClass(node.properties.map { buildMetadata(it) as PropertyMetadata }.toSet())
+    is MetadataClassNode -> MetadataClass(node.properties.map { buildMetadata(it) as MetadataProperty }.toSet())
     is MetadataListNode -> MetadataList(buildMetadata(node.containedType!!) as MetadataType)
-    is MetadataPropertyNode -> PropertyMetadata(
+    is MetadataPropertyNode -> MetadataProperty(
             node.names.first().name,
             buildMetadata(node.type!!) as MetadataType,
             node.names.drop(1).map(MetadataPropertyNameNode::name).toSet())

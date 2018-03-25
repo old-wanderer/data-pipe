@@ -16,9 +16,9 @@ import com.google.gson.JsonElement
  */
 fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
     jsonElement.isJsonObject -> {
-        val properties = mutableSetOf<PropertyMetadata>()
+        val properties = mutableSetOf<MetadataProperty>()
         for ((key, value) in jsonElement.asJsonObject.entrySet()) {
-            properties.add(PropertyMetadata(key, constructMetadataFromJson(value)))
+            properties.add(MetadataProperty(key, constructMetadataFromJson(value)))
         }
         MetadataClass(properties)
     }
@@ -38,4 +38,20 @@ fun constructMetadataFromJson(jsonElement: JsonElement): MetadataType = when {
         }
     }
     else -> PrimitiveNull
+}
+
+private fun merge(prefix: String, name: String) = if (prefix == "") name else "$prefix.$name"
+
+fun metadataPropertiesPaths(metadataClass: MetadataClass, prefix: String = ""): List<String> {
+    val result = mutableListOf<String>()
+    for (child in metadataClass.properties) {
+        val childPaths = when {
+            child.type is MetadataClass -> metadataPropertiesPaths(child.type, merge(prefix, child.name))
+            child.type is MetadataList && child.type.containsType is MetadataClass ->
+                metadataPropertiesPaths(child.type.containsType, merge(prefix, child.name))
+            else -> listOf(merge(prefix, child.name))
+        }
+        result.addAll(childPaths)
+    }
+    return result
 }

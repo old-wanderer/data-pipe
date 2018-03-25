@@ -1,18 +1,21 @@
 package datapipe.core.pipeline
 
-import datapipe.core.data.generator.ClassGenerator
 import datapipe.core.data.model.DataRepository
 import datapipe.core.data.model.metadata.*
 import datapipe.core.data.model.metadata.parser.*
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.Metadata
 import datapipe.core.data.model.metadata.MetadataType
 import datapipe.core.data.model.metadata.PrimitiveNull
+import datapipe.core.data.model.metadata.parser.visitor.AliasForBadNameVisitor
+import datapipe.core.data.model.metadata.parser.visitor.MetadataAstNodeVisitor
+import datapipe.core.data.model.metadata.parser.visitor.RemovePropertiesByNameVisitor
+import datapipe.core.data.model.metadata.parser.visitor.RemoveUnnecessaryPropertiesVisitor
 import java.io.BufferedReader
 import java.io.FileReader
 import java.util.stream.Collectors
-import kotlin.collections.LinkedHashSet
 
 /**
  * @author: Andrei Shlykov
@@ -20,120 +23,83 @@ import kotlin.collections.LinkedHashSet
  */
 object Pipelines {
 
-    fun extractModelFrom(path: String, limit: Long = -1): PipelineElement<Unit, Metadata> =
+    fun extractModelFrom(path: String, limit: Long = -1): AbstractPipelineElement<Unit, Metadata> =
             ModelExtractor(path, limit)
 
-    fun generateClass(): PipelineElement<Metadata, Class<*>> =
-            PipelineElement { ClassGenerator.generateClass(it as MetadataClass) }
+    fun generateClass(): AbstractPipelineElement<Metadata, Class<GeneratedClass>> =
+            PipelineElement { (it as MetadataClass).generatedClass }
 
-    fun parseData(path: String, limit: Long = -1): PipelineElement<Class<*>, DataRepository> =
+    fun parseData(path: String, limit: Long = -1): AbstractPipelineElement<Class<GeneratedClass>, DataRepository> =
             DataParser(path, limit)
 
-    fun aliasForBadNames(): PipelineElement<Metadata, Metadata> =
-            PipelineElement { source ->
-                if (source is MetadataClass) {
-                    val root = buildMetadataAstTree(tokenize(source).toList())
-                    val visitor = AliasForBadNameVisitor()
-                    root.forEach { it.visit(visitor) }
-                    buildMetadata(root)
-                } else {
-                    source!!
-                }
-            }
+    fun aliasForBadNames(): AbstractPipelineElement<Metadata, Metadata> =
+            MetadataVisitorConsumer(MetadataAstNode::levelOrderIterator, AliasForBadNameVisitor())
 
-    fun removeUnnecessaryProperties(): PipelineElement<Metadata, Metadata> =
-            PipelineElement { source ->
-                if (source is MetadataClass) {
-                    val root = buildMetadataAstTree(tokenize(source).toList())
-                    val visitor = RemoveUnnecessaryPropertiesVisitor()
-                    root.postOrderIterator().forEach { it.visit(visitor) }
-                    buildMetadata(root)
-                } else {
-                    source!!
-                }
-            }
+    fun removeUnnecessaryProperties(): AbstractPipelineElement<Metadata, Metadata> =
+            MetadataVisitorConsumer(MetadataAstNode::postOrderIterator, RemoveUnnecessaryPropertiesVisitor())
 
-    fun <T> process(task: (T?) -> Unit): PipelineElement<T, T> =
-            PipelineElement({
-                task(it)
-                it!!
-            })
+    fun excludeNamesFromMetadata(vararg names: String): AbstractPipelineElement<Metadata, Metadata> =
+            MetadataVisitorConsumer(MetadataAstNode::postOrderIterator, RemovePropertiesByNameVisitor(names.toSet()))
 
+    fun <T> process(task: (T?) -> Unit): AbstractPipelineElement<T, T> = PipelineElement {
+        task(it)
+        it!!
+    }
 
     private class DataParser(val path: String, val limit: Long)
-        : PipelineElement<Class<*>, DataRepository>
-    ({ clazz ->
-        val reader = BufferedReader(FileReader(path))
-        val gson = Gson()
+        : AbstractPipelineElement<Class<GeneratedClass>, DataRepository>()
+    {
+        // TODO возможно стоит принимать Either<Class<GeneratedClass>, BrokenPipe>
+        override fun performTask(param: Class<GeneratedClass>?): DataRepository {
+            if (param == null) throw RuntimeException("param is null")
 
-        var stream = reader.lines()
-        if (limit > 0) {
-            stream = stream.limit(limit)
-        }
-        val lst = stream.map { str -> gson.fromJson(str, clazz) }.collect(Collectors.toList())
+            val reader = BufferedReader(FileReader(path))
+            val gson = Gson()
 
-        DataRepository(clazz!!, lst)
-    })
-
-    private class ModelExtractor(val path: String, val limit: Long)
-        : PipelineElement<Unit, Metadata>
-    ({
-        val reader = BufferedReader(FileReader(path))
-        val parser = JsonParser()
-
-        var stream = reader.lines()
-        if (limit > 0) {
-            stream = stream.limit(limit)
-        }
-        stream
-                .map { constructMetadataFromJson(parser.parse(it)) }
-                .reduce(PrimitiveNull, MetadataType::combine)
-    })
-
-    // TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
-    // по умаолчанию должно проверять корректность индетификатора в java
-    private class AliasForBadNameVisitor: MetadataAstNodeVisitor {
-
-        fun String.isBadName() = this[0] == '/'
-        fun String.correctBadName() = this.substring(1)
-
-        override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
-            val nameNode = node.names.first()
-            if (nameNode.name.isBadName()) {
-                // пересобираются, так как надо поддерживать порядок
-                // говнокод какой-то :( // FIXME
-                val newChildren = LinkedHashSet<MetadataAstNode>()
-                newChildren.add(MetadataPropertyNameNode(nameNode.name.correctBadName(), node))
-                node.children.remove(nameNode)
-                newChildren.addAll(node.children)
-                newChildren.add(MetadataPropertyNameNode(nameNode.name, node))
-                node.children.removeIf { true }
-                node.children.addAll(newChildren)
+            var stream = reader.lines()
+            if (limit > 0) {
+                stream = stream.limit(limit)
             }
+            val lst = stream.map { str -> gson.fromJson(str, param) }.collect(Collectors.toList())
+
+            return DataRepository(param, lst)
         }
     }
 
-    // TODO расширать предикат для удаления
-    private class RemoveUnnecessaryPropertiesVisitor: MetadataAstNodeVisitor {
+    private class ModelExtractor(val path: String, val limit: Long)
+        : AbstractPipelineElement<Unit, Metadata>()
+    {
+        override fun performTask(param: Unit?): Metadata {
+            val reader = BufferedReader(FileReader(path))
+            val parser = JsonParser()
 
-        private fun isUnnecessaryNode(node: MetadataAstNode) = when (node) {
-            is MetadataPropertyNode -> node.type == null
-            is MetadataListNode -> node.containedType == null
-            is MetadataClassNode -> node.properties.isEmpty()
-            is MetadataPrimitiveNode -> node.type == PrimitiveNull
-            else -> false
+            var stream = reader.lines()
+            if (limit > 0) {
+                stream = stream.limit(limit)
+            }
+            return stream
+                    .map { constructMetadataFromJson(parser.parse(it)) }
+                    .reduce(PrimitiveNull, MetadataType::combine)
         }
+    }
 
-        override fun visitMetadataClassNode(node: MetadataClassNode) {
-            node.children.removeIf(this::isUnnecessaryNode)
-        }
+    private class MetadataVisitorConsumer(val rootIterator: MetadataAstNode.() -> Iterator<MetadataAstNode>,
+                                          val visitor: MetadataAstNodeVisitor)
+        : AbstractPipelineElement<Metadata, Metadata>()
+    {
+        // TODO возможно стоит принимать Either<Class<GeneratedClass>, BrokenPipe>
+        override fun performTask(param: Metadata?): Metadata {
+            if (param == null) throw RuntimeException("param is null")
 
-        override fun visitMetadataListNode(node: MetadataListNode) {
-            node.children.removeIf(this::isUnnecessaryNode)
-        }
-
-        override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
-            node.children.removeIf(this::isUnnecessaryNode)
+            return if (param is MetadataClass) {
+                val root = buildMetadataAstTree(tokenize(param).toList())
+                root.rootIterator().forEach { it.visit(visitor) }
+                buildMetadata(root)
+            } else {
+                // TODO По сути это ошибка, так как операция нацелена на MetadataClass
+                // возможно стоит возвращать Either<MetadataClass, BrokenPipe>
+                param
+            }
         }
     }
 
