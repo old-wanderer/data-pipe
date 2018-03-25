@@ -1,4 +1,4 @@
-module abm.rnd {
+module datapipe.examples {
 
     requires datapipe.core.data;
     requires datapipe.core.pipeline;
