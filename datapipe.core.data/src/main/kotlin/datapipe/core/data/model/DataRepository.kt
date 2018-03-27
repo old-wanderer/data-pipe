@@ -5,6 +5,8 @@ import datapipe.core.data.generator.metadata
 import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.metadataPropertiesPaths
 import datapipe.core.data.model.metadata.transformer.MetadataTransformer
+import datapipe.core.data.model.metadata.transformer.MetadataTransformerBuilder
+import datapipe.core.data.model.metadata.transformer.transformTo
 import java.io.BufferedWriter
 import java.io.FileWriter
 
@@ -21,6 +23,15 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
             DataRepository(containsClass, values.subList(range.first, range.last))
 
     operator fun get(index: Int) = values[index]
+
+    fun transform(target: MetadataClass, builder: MetadataTransformerBuilder.() -> Unit): DataRepository {
+        val transformer = containsClass.metadata().transformTo(builder)
+        return DataRepository(target.generatedClass, values.map { value ->
+            val destination = target.generatedClass.getDeclaredConstructor().newInstance()
+            transformer.transform(value, destination)
+        }.toMutableList())
+
+    }
 
     fun transform(transformer: MetadataTransformer, target: MetadataClass): DataRepository {
         return DataRepository(target.generatedClass, values.map { value ->

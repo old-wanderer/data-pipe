@@ -101,14 +101,12 @@ fun main(args: Array<String>) {
 
     val nameIndexedAgent = agentsRepo.map { it.getPropertyValue("name") as String to it }.toMap()
 
-    val transformer = MetadataTransformer(listOf<MetadataTransformOperation>(
-            MetadataMovePropertyOperation("decision", "decision"),
-            MetadataMovePropertyOperation("names_entities.LOCATION", "location"),
-            MetadataMovePropertyOperation("names_entities.ORGANIZATION", "organization"),
-            MetadataMovePropertyOperation("names_entities.PERSON", "person")
-    ))
-
-    val transformValues1 = pipeline.value.transform(transformer, result_metadata)
+    val transformValues1 = pipeline.value.transform(result_metadata) {
+        "decision" moveTo "decision"
+        "names_entities.LOCATION" moveTo "location"
+        "names_entities.ORGANIZATION" moveTo "organization"
+        "names_entities.PERSON" moveTo "person"
+    }
     val transformValues2 = transformValues1.map { transformDataStep2(it, nameIndexedAgent) }
 
     val writer = BufferedWriter(FileWriter("./work_output/dp-33/result.txt"))
