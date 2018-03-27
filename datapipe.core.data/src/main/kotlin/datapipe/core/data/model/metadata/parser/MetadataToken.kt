@@ -29,7 +29,7 @@ object ListEnd: MetadataToken()
 
 
 @Suppress("LeakingThis")
-abstract class MetadataAstNode(val parent: MetadataAstNode? = null)
+abstract class MetadataAstNode(var parent: MetadataAstNode? = null)
     : Visited<MetadataAstNodeVisitor>, Iterable<MetadataAstNode> {
 
     init {

@@ -24,20 +24,12 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
 
     operator fun get(index: Int) = values[index]
 
-    fun transform(target: MetadataClass, builder: MetadataTransformerBuilder.() -> Unit): DataRepository {
+    fun transform(builder: MetadataTransformerBuilder.() -> Unit): DataRepository {
         val transformer = containsClass.metadata().transformTo(builder)
-        return DataRepository(target.generatedClass, values.map { value ->
-            val destination = target.generatedClass.getDeclaredConstructor().newInstance()
-            transformer.transform(value, destination)
-        }.toMutableList())
+        return DataRepository(
+                transformer.destinationMetadata.generatedClass,
+                values.map(transformer::transform).toMutableList())
 
-    }
-
-    fun transform(transformer: MetadataTransformer, target: MetadataClass): DataRepository {
-        return DataRepository(target.generatedClass, values.map { value ->
-            val destination = target.generatedClass.getDeclaredConstructor().newInstance()
-            transformer.transform(value, destination)
-        }.toMutableList())
     }
 
     // TODO test

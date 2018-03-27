@@ -4,9 +4,6 @@ import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.*
 import datapipe.core.pipeline.Pipelines
 import com.google.gson.Gson
-import datapipe.core.data.model.metadata.transformer.MetadataTransformer
-import datapipe.core.data.model.metadata.transformer.operation.MetadataMovePropertyOperation
-import datapipe.core.data.model.metadata.transformer.operation.MetadataTransformOperation
 import java.io.BufferedWriter
 import java.io.FileWriter
 
@@ -14,13 +11,6 @@ import java.io.FileWriter
  * @author: Andrei Shlykov
  * @since: 28.02.2018
  */
-
-val result_metadata = metadataClass {
-    + ("decision" to metadataList(PrimitiveString))
-    + ("location" to metadataList(PrimitiveString))
-    + ("organization" to metadataList(PrimitiveString))
-    + ("person" to metadataList(PrimitiveString))
-}
 
 val finish_metadata = metadataClass {
     + ("decision" to metadataList(PrimitiveString))
@@ -101,8 +91,7 @@ fun main(args: Array<String>) {
 
     val nameIndexedAgent = agentsRepo.map { it.getPropertyValue("name") as String to it }.toMap()
 
-    val transformValues1 = pipeline.value.transform(result_metadata) {
-        "decision" moveTo "decision"
+    val transformValues1 = pipeline.value.transform {
         "names_entities.LOCATION" moveTo "location"
         "names_entities.ORGANIZATION" moveTo "organization"
         "names_entities.PERSON" moveTo "person"
