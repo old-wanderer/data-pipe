@@ -31,6 +31,10 @@ abstract class GeneratedClass {
         return null
     }
 
+    fun setPropertyValue(propertyNameChain: String, value: Any?) {
+        javaClass.getDeclaredField(propertyNameChain).set(this, value)
+    }
+
     private fun getValue(propName: String): Any? {
         val field = javaClass.getDeclaredField(propName)
         if (!field.isAccessible) {

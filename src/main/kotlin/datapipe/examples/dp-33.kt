@@ -4,6 +4,9 @@ import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.*
 import datapipe.core.pipeline.Pipelines
 import com.google.gson.Gson
+import datapipe.core.data.model.metadata.transformer.MetadataTransformer
+import datapipe.core.data.model.metadata.transformer.operation.MetadataMovePropertyOperation
+import datapipe.core.data.model.metadata.transformer.operation.MetadataTransformOperation
 import java.io.BufferedWriter
 import java.io.FileWriter
 
@@ -34,26 +37,9 @@ val finish_metadata = metadataClass {
     }))
 }
 
-val result_class = result_metadata.generatedClass
 val finish_class = finish_metadata.generatedClass
 val agentClass = ((finish_metadata.properties.find { it.name == "person" }!!.type as MetadataList)
         .containsType as MetadataClass).generatedClass
-
-fun transformData(oldObj: GeneratedClass): GeneratedClass {
-    val dec_setter = result_class.getField("decision")::set
-    val loc_setter = result_class.getField("location")::set
-    val org_setter = result_class.getField("organization")::set
-    val per_setter = result_class.getField("person")::set
-
-    val newObj = result_class.newInstance() as GeneratedClass
-    dec_setter(newObj, oldObj.getPropertyValue("decision"))
-    loc_setter(newObj, oldObj.getPropertyValue("names_entities.LOCATION"))
-    org_setter(newObj, oldObj.getPropertyValue("names_entities.ORGANIZATION"))
-    per_setter(newObj, oldObj.getPropertyValue("names_entities.PERSON"))
-
-    return newObj
-}
-
 
 fun transformDataStep2(oldObj: GeneratedClass, indexedAgents: Map<String, GeneratedClass>): GeneratedClass {
     val finish_dec_setter = finish_class.getField("decision")::set
@@ -115,7 +101,14 @@ fun main(args: Array<String>) {
 
     val nameIndexedAgent = agentsRepo.map { it.getPropertyValue("name") as String to it }.toMap()
 
-    val transformValues1 = pipeline.value.map(::transformData)
+    val transformer = MetadataTransformer(listOf<MetadataTransformOperation>(
+            MetadataMovePropertyOperation("decision", "decision"),
+            MetadataMovePropertyOperation("names_entities.LOCATION", "location"),
+            MetadataMovePropertyOperation("names_entities.ORGANIZATION", "organization"),
+            MetadataMovePropertyOperation("names_entities.PERSON", "person")
+    ))
+
+    val transformValues1 = pipeline.value.transform(transformer, result_metadata)
     val transformValues2 = transformValues1.map { transformDataStep2(it, nameIndexedAgent) }
 
     val writer = BufferedWriter(FileWriter("./work_output/dp-33/result.txt"))

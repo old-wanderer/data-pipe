@@ -2,7 +2,9 @@ package datapipe.core.data.model
 
 import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.generator.metadata
+import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.metadataPropertiesPaths
+import datapipe.core.data.model.metadata.transformer.MetadataTransformer
 import java.io.BufferedWriter
 import java.io.FileWriter
 
@@ -19,6 +21,13 @@ class DataRepository(val containsClass: Class<GeneratedClass>,
             DataRepository(containsClass, values.subList(range.first, range.last))
 
     operator fun get(index: Int) = values[index]
+
+    fun transform(transformer: MetadataTransformer, target: MetadataClass): DataRepository {
+        return DataRepository(target.generatedClass, values.map { value ->
+            val destination = target.generatedClass.getDeclaredConstructor().newInstance()
+            transformer.transform(value, destination)
+        }.toMutableList())
+    }
 
     // TODO test
     fun saveToCSV(path: String) {

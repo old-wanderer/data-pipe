@@ -8,6 +8,8 @@ module datapipe.core.data {
     exports datapipe.core.data.model.metadata;
     exports datapipe.core.data.model.metadata.parser;
     exports datapipe.core.data.model.metadata.parser.visitor;
+    exports datapipe.core.data.model.metadata.transformer;
+    exports datapipe.core.data.model.metadata.transformer.operation;
     exports datapipe.core.data.generator;
 
 }
