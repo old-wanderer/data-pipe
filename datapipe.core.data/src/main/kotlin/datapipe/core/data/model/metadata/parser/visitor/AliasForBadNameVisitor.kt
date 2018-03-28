@@ -8,12 +8,15 @@ import datapipe.core.data.model.metadata.parser.MetadataPropertyNode
  * @author: Andrei Shlykov
  * @since: 24.03.2018
  */
-// TODO возможность задать isBadName, correctBadName и обобщить механиз реконструкции метадаты
-// по умаолчанию должно проверять корректность индетификатора в java
+// TODO возможность задать isBadName, correctBadName
 class AliasForBadNameVisitor: MetadataAstNodeVisitor {
 
-    private fun String.isBadName() = this[0] == '/'
-    private fun String.correctBadName() = this.substring(1)
+    private fun String.isBadName() = !this.first().isJavaIdentifierStart() || !this.all(Char::isJavaIdentifierPart)
+    private fun String.correctBadName() = buildString {
+        val firstCharIndex = this@correctBadName.indexOfFirst(Char::isJavaIdentifierStart)
+        append(this@correctBadName[firstCharIndex])
+        append(this@correctBadName.drop(firstCharIndex+1).filter(Char::isJavaIdentifierPart))
+    }
 
     override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
         val nameNode = node.names.first()
