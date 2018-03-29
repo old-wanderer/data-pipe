@@ -1,5 +1,6 @@
 package datapipe.core.data.model.metadata.parser.visitor
 
+import datapipe.core.common.PredicateProcessor
 import datapipe.core.data.model.metadata.parser.MetadataAstNode
 import datapipe.core.data.model.metadata.parser.MetadataPropertyNameNode
 import datapipe.core.data.model.metadata.parser.MetadataPropertyNode
@@ -8,23 +9,37 @@ import datapipe.core.data.model.metadata.parser.MetadataPropertyNode
  * @author: Andrei Shlykov
  * @since: 24.03.2018
  */
-// TODO возможность задать isBadName, correctBadName
-class AliasForBadNameVisitor: MetadataAstNodeVisitor {
+private typealias VisitorPredicate = (String) -> Boolean
+private typealias VisitorProcessor = (String) -> String
 
-    private fun String.isBadName() = !this.first().isJavaIdentifierStart() || !this.all(Char::isJavaIdentifierPart)
-    private fun String.correctBadName() = buildString {
-        val firstCharIndex = this@correctBadName.indexOfFirst(Char::isJavaIdentifierStart)
-        append(this@correctBadName[firstCharIndex])
-        append(this@correctBadName.drop(firstCharIndex+1).filter(Char::isJavaIdentifierPart))
+class AliasForBadNameVisitor(private val predicateProcessor: PredicateProcessor<String, String> =
+                                     PredicateProcessor(defaultPredicate, defaultProcessor))
+    : MetadataAstNodeVisitor {
+
+    constructor(vararg ops: Pair<VisitorPredicate, VisitorProcessor>): this(PredicateProcessor(ops.toList()))
+
+    companion object {
+        val defaultPredicate: VisitorPredicate =
+                { parameter -> !parameter.first().isJavaIdentifierStart() || !parameter.all(Char::isJavaIdentifierPart) }
+        val defaultProcessor: VisitorProcessor = { parameter -> buildString {
+            val firstCharIndex = parameter.indexOfFirst(Char::isJavaIdentifierStart)
+            append(parameter[firstCharIndex])
+            append(parameter.drop(firstCharIndex+1).filter(Char::isJavaIdentifierPart))
+        }}
     }
 
     override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
         val nameNode = node.names.first()
-        if (nameNode.name.isBadName()) {
+        var name = nameNode.name
+        while (true) {
+            val processor = predicateProcessor.findProcessor(name) ?: break
+            name = processor(name)
+        }
+        if (nameNode.name != name) {
             // пересобираются, так как надо поддерживать порядок
             // говнокод какой-то :( // FIXME
             val newChildren = LinkedHashSet<MetadataAstNode>()
-            newChildren.add(MetadataPropertyNameNode(nameNode.name.correctBadName(), node))
+            newChildren.add(MetadataPropertyNameNode(name, node))
             node.children.remove(nameNode)
             newChildren.addAll(node.children)
             newChildren.add(MetadataPropertyNameNode(nameNode.name, node))
