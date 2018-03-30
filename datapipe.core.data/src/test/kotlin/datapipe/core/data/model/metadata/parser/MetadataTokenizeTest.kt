@@ -121,9 +121,9 @@ class MetadataTokenizeTest {
     @Test
     fun aliasNameTest() {
         val source = metadataClass {
-            + ("p0" to PrimitiveLong)
-            + ("p1" or "p01" to PrimitiveLong)
-            + ("p2" or "p02" or "p10" to PrimitiveLong)
+            + "p0" to PrimitiveLong
+            + "p1" or "p01" to PrimitiveLong
+            + "p2" or "p02" or "p10" to PrimitiveLong
         }
         val expectedTokens = listOf(
                 ObjectBegin,

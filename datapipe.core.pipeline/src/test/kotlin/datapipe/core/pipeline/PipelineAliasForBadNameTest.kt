@@ -15,12 +15,12 @@ class PipelineAliasForBadNameTest {
     @Test
     fun aliasCreateTest() {
         val sourceMetadata = metadataClass {
-            + ("good1" to PrimitiveLong)
-            + ("/bad1" to PrimitiveBoolean)
+            + "good1" to PrimitiveLong
+            + "/bad1" to PrimitiveBoolean
         }
         val expectedMetadata = metadataClass {
-            + ("good1" to PrimitiveLong)
-            + ("bad1" or "/bad1" to PrimitiveBoolean)
+            + "good1" to PrimitiveLong
+            + "bad1" or "/bad1" to PrimitiveBoolean
         }
 
         Assertions.assertEquals(expectedMetadata, (sourceMetadata + Pipelines.aliasForBadNames()).value)
@@ -29,12 +29,12 @@ class PipelineAliasForBadNameTest {
     @Test
     fun alias2CreateTest() {
         val sourceMetadata = metadataClass {
-            + ("good1" to PrimitiveLong)
-            + ("/bad1" or "/some_bad_name" to PrimitiveBoolean)
+            + "good1" to PrimitiveLong
+            + "/bad1" or "/some_bad_name" to PrimitiveBoolean
         }
         val expectedMetadata = metadataClass {
-            + ("good1" to PrimitiveLong)
-            + ("bad1" or "/bad1" or "/some_bad_name" to PrimitiveBoolean)
+            + "good1" to PrimitiveLong
+            + "bad1" or "/bad1" or "/some_bad_name" to PrimitiveBoolean
         }
 
         Assertions.assertEquals(expectedMetadata, (sourceMetadata + Pipelines.aliasForBadNames()).value)

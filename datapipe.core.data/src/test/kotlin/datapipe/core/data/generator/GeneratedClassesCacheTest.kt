@@ -41,12 +41,12 @@ class GeneratedClassesCacheTest {
             + PrimitiveString
             + PrimitiveLong
             + PrimitiveDouble
-            + ("nested" to metadataClass {
+            + "nested" to metadataClass {
                 + PrimitiveBoolean
                 + PrimitiveString
                 + PrimitiveLong
                 + PrimitiveDouble
-            })
+            }
         }
 
 

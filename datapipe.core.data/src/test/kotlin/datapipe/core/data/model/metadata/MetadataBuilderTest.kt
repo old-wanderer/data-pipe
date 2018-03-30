@@ -13,7 +13,7 @@ class MetadataBuilderTest {
     fun buildMetadataClassWithAliases() {
         val expected = MetadataClass(setOf(MetadataProperty("prop1", PrimitiveString, setOf("/badName1"))))
         val metadata = metadataClass {
-            + ("prop1" or "/badName1" to PrimitiveString)
+            + "prop1" or "/badName1" to PrimitiveString
         }
 
         Assertions.assertEquals(expected, metadata)

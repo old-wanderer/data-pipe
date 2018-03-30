@@ -26,14 +26,14 @@ class ConstructMetadataFromJsonTest {
                 Arguments.of("{ \"p0\": 42 }", "{ \"p0\": 42 }", metadataClass { +PrimitiveDouble }),
                 Arguments.of("{ \"a\": 42 }", "{ \"b\": 42 }",
                         metadataClass {
-                            + ("a" to PrimitiveDouble)
-                            + ("b" to PrimitiveDouble)
+                            + "a" to PrimitiveDouble
+                            + "b" to PrimitiveDouble
                         }
                 ),
                 Arguments.of("{ \"a\": 42, \"s\": 24 }", "{ \"a\": 42, \"s\": \"some string\" }",
                         metadataClass {
-                            + ("s" to PrimitiveString)
-                            + ("a" to PrimitiveDouble)
+                            + "s" to PrimitiveString
+                            + "a" to PrimitiveDouble
                         }
                 )
         )
@@ -58,7 +58,7 @@ class ConstructMetadataFromJsonTest {
     @TestFactory
     fun extractModelTest() = listOf(
             "{\"p0\": 5}" to metadataClass { +PrimitiveDouble },
-            "{\"a\": 5}" to metadataClass { +("a" to PrimitiveDouble) },
+            "{\"a\": 5}" to metadataClass { +"a" to PrimitiveDouble },
             "{\"p0\": [[\"tests\"], [\"amazing\"]]}" to metadataClass { +metadataList(metadataList(PrimitiveString)) }
     ).mapIndexed { index, (input, expected) ->
         DynamicTest.dynamicTest("extractModelTest. Data index: $index") {

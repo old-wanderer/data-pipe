@@ -13,18 +13,18 @@ import java.io.FileWriter
  */
 
 val finish_metadata = metadataClass {
-    + ("decision" to metadataList(PrimitiveString))
-    + ("location" to metadataList(PrimitiveString))
-    + ("organization" to metadataList(PrimitiveString))
-    + ("person" to metadataList(metadataClass {
-        + ("name" to PrimitiveString)
-        + ("category" to PrimitiveString)
-        + ("grade" to PrimitiveString)
-        + ("location" to PrimitiveString)
-        + ("occupation" to PrimitiveString)
-        + ("pay_plan" to PrimitiveString)
-        + ("salary" to PrimitiveString)
-    }))
+    + "decision" to metadataList(PrimitiveString)
+    + "location" to metadataList(PrimitiveString)
+    + "organization" to metadataList(PrimitiveString)
+    + "person" to metadataList(metadataClass {
+        + "name" to PrimitiveString
+        + "category" to PrimitiveString
+        + "grade" to PrimitiveString
+        + "location" to PrimitiveString
+        + "occupation" to PrimitiveString
+        + "pay_plan" to PrimitiveString
+        + "salary" to PrimitiveString
+    })
 }
 
 val finish_class = finish_metadata.generatedClass

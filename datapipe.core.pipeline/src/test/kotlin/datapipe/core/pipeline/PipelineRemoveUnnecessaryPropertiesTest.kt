@@ -36,29 +36,29 @@ class PipelineRemoveUnnecessaryPropertiesTest {
     @Test
     fun emptyObjectsRemove() {
         val source = metadataClass {
-            + ("p0" to PrimitiveString)
-            + ("p1" to PrimitiveDouble)
-            + ("p2" to metadataClass {  })
-            + ("p3" to metadataClass {
+            + "p0" to PrimitiveString
+            + "p1" to PrimitiveDouble
+            + "p2" to metadataClass { }
+            + "p3" to metadataClass {
                 +PrimitiveString
-            })
-            + ("p4" to metadataClass {
+            }
+            + "p4" to metadataClass {
                 +PrimitiveString
                 + metadataClass {  }
-            })
-            + ("p5" to metadataClass {
+            }
+            + "p5" to metadataClass {
                 + metadataClass {  }
-            })
+            }
         }
         val expected = metadataClass {
-            + ("p0" to PrimitiveString)
-            + ("p1" to PrimitiveDouble)
-            + ("p3" to metadataClass {
+            + "p0" to PrimitiveString
+            + "p1" to PrimitiveDouble
+            + "p3" to metadataClass {
                 +PrimitiveString
-            })
-            + ("p4" to metadataClass {
+            }
+            + "p4" to metadataClass {
                 +PrimitiveString
-            })
+            }
         }
 
         Assertions.assertEquals(expected, (source + Pipelines.removeUnnecessaryProperties()).value)
@@ -67,19 +67,19 @@ class PipelineRemoveUnnecessaryPropertiesTest {
     @Test
     fun emptyListRemove() {
         val source = metadataClass {
-            + ("p0" to PrimitiveString)
-            + ("p1" to PrimitiveDouble)
-            + ("p2" to metadataList())
-            + ("p3" to metadataList(PrimitiveString))
-            + ("p4" to metadataList(metadataClass {  }))
-            + ("p5" to metadataList(metadataClass {
+            + "p0" to PrimitiveString
+            + "p1" to PrimitiveDouble
+            + "p2" to metadataList()
+            + "p3" to metadataList(PrimitiveString)
+            + "p4" to metadataList(metadataClass {  })
+            + "p5" to metadataList(metadataClass {
                 + metadataClass {  }
-            }))
+            })
         }
         val expected = metadataClass {
-            + ("p0" to PrimitiveString)
-            + ("p1" to PrimitiveDouble)
-            + ("p3" to metadataList(PrimitiveString))
+            + "p0" to PrimitiveString
+            + "p1" to PrimitiveDouble
+            + "p3" to metadataList(PrimitiveString)
         }
 
         Assertions.assertEquals(expected, (source + Pipelines.removeUnnecessaryProperties()).value)

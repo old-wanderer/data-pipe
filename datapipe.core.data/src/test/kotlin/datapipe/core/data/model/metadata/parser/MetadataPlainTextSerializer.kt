@@ -23,7 +23,7 @@ class MetadataPlainTextSerializer {
             } to "{p0:PrimitiveString p1:PrimitiveString } ",
             metadataClass {
                 +PrimitiveString
-                + ("p1" or "p2" or "p3" to PrimitiveString)
+                + "p1" or "p2" or "p3" to PrimitiveString
             } to "{p0:PrimitiveString p1|p2|p3:PrimitiveString } ",
             metadataClass {
                 +PrimitiveString

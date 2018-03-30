@@ -36,19 +36,19 @@ class GeneratedClassTest {
     @Test
     fun classGeneratedTest() {
         val meta = metadataClass {
-            + ("primS" to PrimitiveString)
-            + ("primD" to PrimitiveDouble)
-            + ("primB" to PrimitiveBoolean)
-            + ("listPrim" to metadataList(PrimitiveLong))
-            + ("listObj" to metadataList(metadataClass {
-                + ("str1" to PrimitiveString)
-                + ("str2" to PrimitiveString)
-            }))
-            + ("obj" to metadataClass {
-                + ("primS" to PrimitiveString)
-                + ("primD" to PrimitiveDouble)
-                + ("primB" to PrimitiveBoolean)
+            + "primS" to PrimitiveString
+            + "primD" to PrimitiveDouble
+            + "primB" to PrimitiveBoolean
+            + "listPrim" to metadataList(PrimitiveLong)
+            + "listObj" to metadataList(metadataClass {
+                + "str1" to PrimitiveString
+                + "str2" to PrimitiveString
             })
+            + "obj" to metadataClass {
+                + "primS" to PrimitiveString
+                + "primD" to PrimitiveDouble
+                + "primB" to PrimitiveBoolean
+            }
         }
         val clazz = ClassGenerator.generateClass(meta)
         val fields = clazz.declaredFields
