@@ -7,26 +7,45 @@ package datapipe.core.data.model.metadata
 
 class MetadataClassBuilder {
 
-    private val properties = mutableSetOf<MetadataProperty>()
+    private val properties = mutableListOf<MetadataPropertyBuilder>()
 
     operator fun MetadataType.unaryPlus() {
-        properties.add(MetadataProperty("p${properties.size}", this))
+        properties.add(MetadataPropertyBuilder("p${properties.size}") to this)
     }
 
-    @JvmName("addProperty")
-    operator fun Pair<String, MetadataType>.unaryPlus() {
-        properties.add(MetadataProperty(this.first, this.second))
+    operator fun MetadataPropertyBuilder.unaryPlus() {
+        properties.add(this)
     }
 
-    @JvmName("addPropertyWithAlias")
-    operator fun Pair<List<String>, MetadataType>.unaryPlus() {
-        properties.add(MetadataProperty(this.first.first(), this.second, this.first.drop(1).toSet()))
+    operator fun String.unaryPlus(): MetadataPropertyBuilder {
+        val builder = MetadataPropertyBuilder(this)
+        properties.add(builder)
+        return builder
     }
 
-    infix fun String.or(alias: String): List<String> = listOf(this, alias)
-    infix fun List<String>.or(alias: String): List<String> = this + alias
+    infix fun String.to(type: MetadataType) = MetadataPropertyBuilder(this) to type
+    infix fun String.or(alias: String) = MetadataPropertyBuilder(this) or alias
 
-    fun build() = MetadataClass(properties)
+    fun build() = MetadataClass(properties.map(MetadataPropertyBuilder::build).toSet())
+
+}
+
+class MetadataPropertyBuilder(vararg names: String) {
+
+    private val names = mutableListOf(*names)
+    private lateinit var type: MetadataType
+
+    infix fun or(alias: String): MetadataPropertyBuilder {
+        names.add(alias)
+        return this
+    }
+
+    infix fun to(type: MetadataType): MetadataPropertyBuilder {
+        this.type = type
+        return this
+    }
+
+    fun build() = MetadataProperty(names.first(), type, names.drop(1).toSet())
 
 }
 
