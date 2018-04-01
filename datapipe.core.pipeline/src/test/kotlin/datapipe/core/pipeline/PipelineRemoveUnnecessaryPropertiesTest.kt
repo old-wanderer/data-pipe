@@ -1,6 +1,7 @@
 package datapipe.core.pipeline
 
 import datapipe.core.data.model.metadata.*
+import datapipe.core.data.model.metadata.dsl.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

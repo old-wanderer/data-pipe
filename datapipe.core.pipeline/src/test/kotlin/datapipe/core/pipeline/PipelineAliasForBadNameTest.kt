@@ -2,7 +2,7 @@ package datapipe.core.pipeline
 
 import datapipe.core.data.model.metadata.PrimitiveBoolean
 import datapipe.core.data.model.metadata.PrimitiveLong
-import datapipe.core.data.model.metadata.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataClass
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

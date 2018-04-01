@@ -4,6 +4,8 @@ import datapipe.core.data.generator.GeneratedClass
 import datapipe.core.data.model.metadata.*
 import datapipe.core.pipeline.Pipelines
 import com.google.gson.Gson
+import datapipe.core.data.model.metadata.dsl.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataList
 import java.io.BufferedWriter
 import java.io.FileWriter
 

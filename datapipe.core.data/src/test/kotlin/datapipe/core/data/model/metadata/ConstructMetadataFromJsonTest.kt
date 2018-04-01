@@ -1,6 +1,8 @@
 package datapipe.core.data.model.metadata
 
 import com.google.gson.JsonParser
+import datapipe.core.data.model.metadata.dsl.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataList
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory

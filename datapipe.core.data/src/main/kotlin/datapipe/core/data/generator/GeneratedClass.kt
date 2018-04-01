@@ -1,7 +1,7 @@
 package datapipe.core.data.generator
 
 import datapipe.core.data.model.metadata.MetadataClass
-import datapipe.core.data.model.metadata.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataClass
 
 /**
  * @author: Andrei Shlykov

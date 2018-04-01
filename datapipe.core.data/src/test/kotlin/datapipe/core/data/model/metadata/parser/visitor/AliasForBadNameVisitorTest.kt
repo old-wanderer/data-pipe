@@ -1,7 +1,7 @@
 package datapipe.core.data.model.metadata.parser.visitor
 
 import datapipe.core.data.model.metadata.PrimitiveString
-import datapipe.core.data.model.metadata.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataClass
 import datapipe.core.data.model.metadata.parser.buildMetadata
 import datapipe.core.data.model.metadata.parser.buildMetadataAstTree
 import datapipe.core.data.model.metadata.parser.tokenize

@@ -2,6 +2,7 @@ package datapipe.examples
 
 import datapipe.core.data.generator.ClassGenerator
 import datapipe.core.data.model.metadata.*
+import datapipe.core.data.model.metadata.dsl.*
 
 /**
  * @author: Andrei Shlykov

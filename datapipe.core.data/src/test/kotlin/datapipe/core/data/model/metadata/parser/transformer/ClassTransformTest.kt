@@ -1,7 +1,7 @@
 package datapipe.core.data.model.metadata.parser.transformer
 
 import datapipe.core.data.model.metadata.PrimitiveString
-import datapipe.core.data.model.metadata.metadataClass
+import datapipe.core.data.model.metadata.dsl.metadataClass
 import datapipe.core.data.model.metadata.transformer.transformTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
