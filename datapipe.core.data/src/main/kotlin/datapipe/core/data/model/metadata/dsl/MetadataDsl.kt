@@ -7,7 +7,7 @@ import datapipe.core.data.model.metadata.dsl.builder.MetadataClassBuilder
  * @author: Andrei Shlykov
  * @since: 31.03.2018
  */
-fun metadataClass(init: MetadataClassBuilder.() -> Unit): MetadataClass {
+fun metadataClass(init: MetadataDslClass.() -> Unit): MetadataClass {
     val clazz = MetadataClassBuilder()
     clazz.init()
     return clazz.build()

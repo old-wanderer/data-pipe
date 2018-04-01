@@ -2,32 +2,32 @@ package datapipe.core.data.model.metadata.dsl.builder
 
 import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.MetadataType
+import datapipe.core.data.model.metadata.dsl.MetadataDslClass
+import datapipe.core.data.model.metadata.dsl.MetadataDslNamedProperty
+import datapipe.core.data.model.metadata.dsl.MetadataDslTypedProperty
 
 /**
  * @author: Andrei Shlykov
  * @since: 31.03.2018
  */
-class MetadataClassBuilder {
+class MetadataClassBuilder: MetadataDslClass {
 
-    private val properties = mutableListOf<MetadataPropertyBuilder>()
+    private val properties = mutableListOf<MetadataDslTypedProperty>()
 
-    operator fun MetadataType.unaryPlus() {
+    override operator fun MetadataType.unaryPlus() {
         properties.add(MetadataPropertyBuilder("p${properties.size}") to this)
     }
 
-    operator fun MetadataPropertyBuilder.unaryPlus() {
+    override operator fun MetadataDslTypedProperty.unaryPlus() {
         properties.add(this)
     }
 
-    operator fun String.unaryPlus(): MetadataPropertyBuilder {
+    override operator fun String.unaryPlus(): MetadataDslNamedProperty {
         val builder = MetadataPropertyBuilder(this)
         properties.add(builder)
         return builder
     }
 
-    infix fun String.to(type: MetadataType) = MetadataPropertyBuilder(this) to type
-    infix fun String.or(alias: String) = MetadataPropertyBuilder(this) or alias
-
-    fun build() = MetadataClass(properties.map(MetadataPropertyBuilder::build).toSet())
+    override fun build() = MetadataClass(properties.map(MetadataDslTypedProperty::build).toSet())
 
 }

@@ -7,7 +7,6 @@ module datapipe.core.data {
     exports datapipe.core.data.model;
     exports datapipe.core.data.model.metadata;
     exports datapipe.core.data.model.metadata.dsl;
-    exports datapipe.core.data.model.metadata.dsl.builder;
     exports datapipe.core.data.model.metadata.parser;
     exports datapipe.core.data.model.metadata.parser.visitor;
     exports datapipe.core.data.model.metadata.transformer;
