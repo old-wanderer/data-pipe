@@ -32,16 +32,36 @@ abstract class GeneratedClass {
     }
 
     fun setPropertyValue(propertyNameChain: String, value: Any?) {
-        javaClass.getDeclaredField(propertyNameChain).set(this, value)
+        if (propertyNameChain.isNotBlank()) {
+            val propertyNames = propertyNameChain.split(".")
+            var current: Any? = this
+
+            for (name in propertyNames.dropLast(1)) {
+                if (current is GeneratedClass) {
+                    val next = current.getValue(name)
+                    current = if (next == null) {
+                        val cls = current.getField(name).type
+                        if (GeneratedClass::class.java.isAssignableFrom(cls)) {
+                            current.getField(name).set(current, cls.getConstructor().newInstance())
+                            current.getValue(name)
+                        } else {
+                            throw RuntimeException("can't find field or assign value")
+                        }
+                    } else {
+                        next
+                    }
+                }
+            }
+
+            if (current is GeneratedClass) {
+                current.setValue(propertyNames.last(), value)
+            }
+        }
     }
 
-    private fun getValue(propName: String): Any? {
-        val field = javaClass.getDeclaredField(propName)
-        if (!field.isAccessible) {
-            field.isAccessible = true
-        }
-        return field.get(this)
-    }
+    private fun getField(name: String) = javaClass.getDeclaredField(name)
+    private fun getValue(name: String) = getField(name).get(this)
+    private fun setValue(name: String, value: Any?) = getField(name).set(this, value)
 
 }
 
