@@ -1,0 +1,6 @@
+ext.moduleName = 'datapipe.examples'
+
+dependencies {
+    compile project(':datapipe.core.data')
+    compile project(':datapipe.core.pipeline')
+}
