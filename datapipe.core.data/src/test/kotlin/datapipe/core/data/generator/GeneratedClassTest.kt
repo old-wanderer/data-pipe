@@ -13,11 +13,11 @@ import java.lang.reflect.Field
 class GeneratedClassTest {
 
     private val metadata = metadataClass { 
-        + "prop1" to PrimitiveLong
-        + "prop2" to PrimitiveString
+        + "prop1" to PrimitiveLong default 11
+        + "prop2" to PrimitiveString default "prop2"
         + "prop3" to metadataClass { 
-            + "prop3_1" to PrimitiveLong
-            + "prop3_2" to PrimitiveString
+            + "prop3_1" to PrimitiveLong default 31
+            + "prop3_2" to PrimitiveString default "prop3_2"
         }
     }
     
@@ -27,15 +27,18 @@ class GeneratedClassTest {
     fun initTestObject() {
         testObject = metadata.generatedClass.getConstructor().newInstance()
     }
-    
 
-    @Test
-    @Disabled // TODO исправить после DP-50
-    fun getPropertyValueTest() {
-//        Assertions.assertEquals(testObject.prop1, testObject.getPropertyValue("prop1"))
-//        Assertions.assertEquals(testObject.prop2, testObject.getPropertyValue("prop2"))
-        Assertions.assertEquals(31, testObject.getPropertyValue("prop3.prop3_1"))
-        Assertions.assertEquals("prop3_2", testObject.getPropertyValue("prop3.prop3_2"))
+    @TestFactory
+    fun getPropertyValueTest() = listOf(
+            "prop1" to 11L,
+            "prop2" to "prop2",
+            "prop3.prop3_1" to 31L,
+            "prop3.prop3_2" to "prop3_2"
+    ).mapIndexed { index, (path, value) ->
+        DynamicTest.dynamicTest("getPropertyValueTest. Data index: $index") {
+            testObject.setPropertyValue(path, value)
+            Assertions.assertEquals(value, testObject.getPropertyValue(path))
+        }
     }
 
     @TestFactory

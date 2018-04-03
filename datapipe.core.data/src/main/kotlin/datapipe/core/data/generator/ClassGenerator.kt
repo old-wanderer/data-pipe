@@ -33,9 +33,6 @@ object ClassGenerator {
 
     fun generateClass(metadata: MetadataClass): Class<GeneratedClass> {
         val className = "datapipe/core/data/generated/${genClassName()}"
-
-        println("generate class with name : $className")
-
         val byteCode = generateByteCode(className, metadata)
         return loadClass(className, byteCode)
     }
@@ -67,6 +64,7 @@ object ClassGenerator {
         return classWriter.toByteArray()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun loadClass(className: String, byteCode: ByteArray): Class<GeneratedClass> =
             loader.loadNewClass(className.replace("/", "."), byteCode) as Class<GeneratedClass>
 
@@ -116,8 +114,11 @@ object ClassGenerator {
 
     private fun genProperty(metadataProperty: MetadataProperty, classWriter: ClassWriter) {
         val field = when (metadataProperty.type) {
-            is MetadataPrimitive -> classWriter.visitField(Opcodes.ACC_PUBLIC,
-                    metadataProperty.name, getRealType(metadataProperty.type, maybePrimitive = true), null, null)
+            is MetadataPrimitive -> {
+                val defaultValue = (metadataProperty as? MetadataPropertyDefaultValue)?.defaultValue
+                classWriter.visitField(Opcodes.ACC_PUBLIC,
+                        metadataProperty.name, getRealType(metadataProperty.type, maybePrimitive = true), null, defaultValue)
+            }
             is MetadataList -> classWriter.visitField(Opcodes.ACC_PUBLIC,
                     metadataProperty.name, Type.getDescriptor(List::class.java), getRealType(metadataProperty.type), null)
             is MetadataClass -> {

@@ -8,6 +8,8 @@ import datapipe.core.data.model.metadata.MetadataProperty
  */
 interface MetadataDslTypedProperty {
 
+    infix fun default(value: Any): MetadataDslTypedProperty
+
     fun build(): MetadataProperty
 
 }
