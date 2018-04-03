@@ -40,10 +40,12 @@ private fun RootNode.setPropertyNodePath(path: String, propertyNode: MetadataPro
             val nextNode = currentClassNode.properties
                     .find { it.names.any { part == it.name } }?.type as MetadataClassNode?
 
-            if (nextNode == null) {
+            currentClassNode = if (nextNode == null) {
                 val newPropertyNode = MetadataPropertyNode(currentClassNode)
                 MetadataPropertyNameNode(part, newPropertyNode)
-                currentClassNode = MetadataClassNode(newPropertyNode)
+                MetadataClassNode(newPropertyNode)
+            } else {
+                nextNode
             }
         }
         val newPropertyNode = MetadataPropertyNode(currentClassNode)
