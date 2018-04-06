@@ -3,6 +3,7 @@ module datapipe.core.data {
     requires kotlin.stdlib;
     requires org.objectweb.asm;
     requires gson;
+    requires org.apache.logging.log4j;
 
     exports datapipe.core.data.model;
     exports datapipe.core.data.model.metadata;
