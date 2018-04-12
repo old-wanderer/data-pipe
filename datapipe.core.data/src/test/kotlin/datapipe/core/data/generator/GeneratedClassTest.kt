@@ -13,10 +13,10 @@ import java.lang.reflect.Field
 class GeneratedClassTest {
 
     private val metadata = metadataClass { 
-        + "prop1" to PrimitiveLong default 11
+        + "prop1" to PrimitiveLong default 11L
         + "prop2" to PrimitiveString default "prop2"
         + "prop3" to metadataClass { 
-            + "prop3_1" to PrimitiveLong default 31
+            + "prop3_1" to PrimitiveLong default 31L
             + "prop3_2" to PrimitiveString default "prop3_2"
         }
     }
@@ -28,6 +28,9 @@ class GeneratedClassTest {
         testObject = metadata.generatedClass.getConstructor().newInstance()
     }
 
+    /**
+     * Проверка установки значений по умолчанию и матода [GeneratedClass.getPropertyValue]
+     */
     @TestFactory
     fun getPropertyValueTest() = listOf(
             "prop1" to 11L,

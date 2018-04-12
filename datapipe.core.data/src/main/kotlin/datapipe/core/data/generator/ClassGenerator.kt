@@ -49,21 +49,12 @@ object ClassGenerator {
         classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC,
                 className, null, GENERATED_CLASS_FULL_NAME, null)
 
-        val defaultConstructor = classWriter.visitMethod(Opcodes.ACC_PUBLIC,
-                "<init>", "()V", null, null)
-        defaultConstructor.visitCode()
-        defaultConstructor.visitVarInsn(Opcodes.ALOAD, 0)
-        defaultConstructor.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                GENERATED_CLASS_FULL_NAME, "<init>", "()V", false)
-        defaultConstructor.visitInsn(Opcodes.RETURN)
-        defaultConstructor.visitMaxs(1, 1)
-        defaultConstructor.visitEnd()
-
-        genStaticMetadataClass(metadata, classWriter, className)
-
         for (property in metadata.properties) {
             genProperty(property, classWriter)
         }
+
+        genStaticMetadataClass(metadata, classWriter, className)
+        genDefaultConstructor(metadata, classWriter, className)
 
         classWriter.visitEnd()
         return classWriter.toByteArray()
@@ -115,6 +106,26 @@ object ClassGenerator {
         staticConstructor.visitInsn(Opcodes.RETURN)
         staticConstructor.visitMaxs(2, 2)
         staticConstructor.visitEnd()
+    }
+
+    private fun genDefaultConstructor(metadataClass: MetadataClass, classWriter: ClassWriter, className: String) {
+        val defaultConstructor = classWriter.visitMethod(Opcodes.ACC_PUBLIC,
+                "<init>", "()V", null, null)
+        defaultConstructor.visitCode()
+        defaultConstructor.visitVarInsn(Opcodes.ALOAD, 0)
+        defaultConstructor.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                GENERATED_CLASS_FULL_NAME, "<init>", "()V", false)
+
+        for (property in metadataClass.properties.filterIsInstance<MetadataPropertyDefaultValue>()) {
+            defaultConstructor.visitVarInsn(Opcodes.ALOAD, 0)
+            defaultConstructor.visitLdcInsn(property.defaultValue)
+            defaultConstructor.visitFieldInsn(Opcodes.PUTFIELD, className, property.name,
+                    getRealType(property.type, maybePrimitive = true))
+        }
+
+        defaultConstructor.visitInsn(Opcodes.RETURN)
+        defaultConstructor.visitMaxs(1, 1)
+        defaultConstructor.visitEnd()
     }
 
     private fun genProperty(metadataProperty: MetadataProperty, classWriter: ClassWriter) {
