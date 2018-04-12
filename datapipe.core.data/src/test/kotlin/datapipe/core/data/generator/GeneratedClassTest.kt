@@ -36,7 +36,6 @@ class GeneratedClassTest {
             "prop3.prop3_2" to "prop3_2"
     ).mapIndexed { index, (path, value) ->
         DynamicTest.dynamicTest("getPropertyValueTest. Data index: $index") {
-            testObject.setPropertyValue(path, value)
             Assertions.assertEquals(value, testObject.getPropertyValue(path))
         }
     }
@@ -52,6 +51,11 @@ class GeneratedClassTest {
             testObject.setPropertyValue(path, value)
             Assertions.assertEquals(value, testObject.getPropertyValue(path))
         }
+    }
+
+    @Test
+    fun toStringTest() {
+        Assertions.assertEquals("", testObject.toString())
     }
 
     // TODO перенести в ClassGeneratorTest

@@ -2,6 +2,7 @@ package datapipe.core.data.generator
 
 import datapipe.core.data.model.metadata.MetadataClass
 import datapipe.core.data.model.metadata.dsl.metadataClass
+import java.lang.reflect.Modifier
 
 /**
  * @author: Andrei Shlykov
@@ -57,6 +58,18 @@ abstract class GeneratedClass {
                 current.setValue(propertyNames.last(), value)
             }
         }
+    }
+
+    override fun toString() = buildString {
+        append(this@GeneratedClass.javaClass.simpleName).append("[")
+        val fields = this@GeneratedClass.javaClass.declaredFields.filter { !Modifier.isStatic(it.modifiers) }
+        for (field in fields) {
+            append(field.name).append("=")
+            append(field.get(this@GeneratedClass))
+            append(", ")
+        }
+        append(fields.last().name).append("=").append(fields.last().get(this@GeneratedClass))
+        append("]")
     }
 
     private fun getField(name: String) = javaClass.getDeclaredField(name)
