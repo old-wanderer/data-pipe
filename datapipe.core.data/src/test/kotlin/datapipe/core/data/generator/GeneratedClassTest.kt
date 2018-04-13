@@ -58,7 +58,9 @@ class GeneratedClassTest {
 
     @Test
     fun toStringTest() {
-        Assertions.assertEquals("", testObject.toString())
+        Assertions.assertEquals("${testObject.javaClass.simpleName}[prop1=11, prop2=prop2, " +
+                "prop3=${testObject.getPropertyValue("prop3")!!.javaClass.simpleName}[prop3_1=31, prop3_2=prop3_2]]",
+                testObject.toString())
     }
 
     // TODO перенести в ClassGeneratorTest

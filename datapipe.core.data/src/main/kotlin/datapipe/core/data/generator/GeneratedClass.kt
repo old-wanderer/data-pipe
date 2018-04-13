@@ -63,7 +63,7 @@ abstract class GeneratedClass {
     override fun toString() = buildString {
         append(this@GeneratedClass.javaClass.simpleName).append("[")
         val fields = this@GeneratedClass.javaClass.declaredFields.filter { !Modifier.isStatic(it.modifiers) }
-        for (field in fields) {
+        for (field in fields.dropLast(1)) {
             append(field.name).append("=")
             append(field.get(this@GeneratedClass))
             append(", ")
