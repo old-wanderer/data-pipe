@@ -92,7 +92,7 @@ object ClassGenerator {
         )
         staticConstructor.visitMethodInsn(
                 Opcodes.INVOKESTATIC,
-                "datapipe/core/data/model/metadata/parser/MetadataTokenKt",
+                "datapipe/core/data/model/metadata/parser/MetadataAstNodeKt",
                 "buildMetadata",
                 "(Ldatapipe/core/data/model/metadata/parser/MetadataAstNode;)Ldatapipe/core/data/model/metadata/Metadata;",
                 false
