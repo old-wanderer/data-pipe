@@ -29,22 +29,15 @@ class AliasForBadNameVisitor(private val predicateProcessor: PredicateProcessor<
     }
 
     override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
-        val nameNode = node.names.first()
-        var name = nameNode.name
+        var name = node.name!!.name
         while (true) {
             val processor = predicateProcessor.findProcessor(name) ?: break
             name = processor(name)
         }
-        if (nameNode.name != name) {
-            // пересобираются, так как надо поддерживать порядок
-            // говнокод какой-то :( // FIXME
-            val newChildren = LinkedHashSet<MetadataAstNode>()
-            newChildren.add(MetadataPropertyNameNode(name, node))
-            node.children.remove(nameNode)
-            newChildren.addAll(node.children)
-            newChildren.add(MetadataPropertyNameNode(nameNode.name, node))
-            node.children.removeIf { true }
-            node.children.addAll(newChildren)
+        if (node.name!!.name != name) {
+            val alias = node.name
+            val mainName = MetadataPropertyNameNode(name, node)
+            mainName.alias = alias
         }
     }
 }

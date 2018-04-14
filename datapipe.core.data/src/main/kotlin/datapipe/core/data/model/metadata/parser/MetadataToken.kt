@@ -46,18 +46,20 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
                     val propNode = MetadataPropertyNode(current)
                     MetadataPropertyNameNode(token.name, propNode)
                 }
+                // todo test for build metadata with aliases
                 is MetadataPropertyNode -> MetadataPropertyNameNode(token.name, current)
+                is MetadataPropertyNameNode -> MetadataPropertyNameNode(token.name, current)
                 else -> throw RuntimeException("can't attach PropertyNameNode")
             }
 
             is PrimitiveToken -> {
                 when (current) {
                     is MetadataPropertyNode -> {
-                        current.children.add(MetadataPrimitiveNode(token.type, current))
+                        current.addChild(MetadataPrimitiveNode(token.type, current))
                         current.parent!!
                     }
                     is MetadataListNode -> {
-                        current.children.add(MetadataPrimitiveNode(token.type, current))
+                        current.addChild(MetadataPrimitiveNode(token.type, current))
                         current
                     }
                     else -> throw RuntimeException("sddssd")
@@ -78,8 +80,18 @@ fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
                 }
             }
 
-            TypeSeparator -> current.parent!!
-            AliasSeparator -> current.parent!!
+            TypeSeparator -> {
+                if (current is MetadataPropertyNameNode) {
+                    var propNode = current
+                    while (propNode !is MetadataPropertyNode) {
+                        propNode = propNode.parent!!
+                    }
+                    propNode
+                } else {
+                    throw RuntimeException("expected MetadataPropertyNameNode before TypeSeparator")
+                }
+            }
+            AliasSeparator -> current
             EOFToken -> if (current is RootNode) current else throw RuntimeException("unexpected EOFToken")
         }
     }

@@ -23,14 +23,21 @@ class RemoveUnnecessaryPropertiesVisitor(private val predicate: (MetadataAstNode
     }
 
     override fun visitMetadataClassNode(node: MetadataClassNode) {
-        node.children.removeIf { predicate(it) }
+        node.properties.removeIf { predicate(it) }
     }
 
     override fun visitMetadataListNode(node: MetadataListNode) {
-        node.children.removeIf { predicate(it) }
+        if (predicate(node.containedType!!)) {
+            node.containedType = null
+        }
     }
 
     override fun visitMetadataPropertyNode(node: MetadataPropertyNode) {
-        node.children.removeIf { predicate(it) }
+        if (predicate(node.name!!)) {
+            node.name = null
+        }
+        if (predicate(node.type!!)) {
+            node.type = null
+        }
     }
 }

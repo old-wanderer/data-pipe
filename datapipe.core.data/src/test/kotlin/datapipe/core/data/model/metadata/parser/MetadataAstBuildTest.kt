@@ -167,13 +167,14 @@ class MetadataAstBuildTest {
 
         val child1_3_1 = MetadataPropertyNameNode("child1_3_1", child1_3)
         val child1_3_2 = MetadataClassNode(child1_3)
-        val child1_3_2_1 = MetadataPropertyNameNode("child1_3_2_1", child1_3_2)
-        val child1_3_2_2 = MetadataPrimitiveNode(PrimitiveString, child1_3_2)
+        val child1_3_2_1 = MetadataPropertyNode(child1_3_2)
+        val child1_3_2_1_1 = MetadataPropertyNameNode("child1_3_2_1_1", child1_3_2_1)
+        val child1_3_2_1_2 = MetadataPrimitiveNode(PrimitiveString, child1_3_2_1)
 
         val lst = listOf(
                 child1_1_1, child1_1_2, child1_1,
                 child1_2_1, child1_2_2_1, child1_2_2, child1_2,
-                child1_3_1, child1_3_2_1, child1_3_2_2, child1_3_2, child1_3,
+                child1_3_1, child1_3_2_1_1, child1_3_2_1_2, child1_3_2_1, child1_3_2, child1_3,
                 child1, root
         )
 

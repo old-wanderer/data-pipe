@@ -18,7 +18,7 @@ class MetadataTransformerBuilder(sourceMetadata: MetadataClass) {
         operations.add(MetadataMovePropertyOperation(this, destinationPropPath))
 
         val propertyNode = root.getPropertyNodeByPath(this)
-        propertyNode.parent!!.children.remove(propertyNode)
+        (propertyNode.parent!! as MetadataClassNode).properties.remove(propertyNode)
         root.setPropertyNodePath(destinationPropPath, propertyNode)
     }
 
@@ -51,7 +51,7 @@ private fun RootNode.setPropertyNodePath(path: String, propertyNode: MetadataPro
         val newPropertyNode = MetadataPropertyNode(currentClassNode)
         MetadataPropertyNameNode(parts.last(), newPropertyNode)
         propertyNode.type!!.parent = newPropertyNode
-        newPropertyNode.children.add(propertyNode.type!!)
+        newPropertyNode.addChild(propertyNode.type!!)
         return
     }
     throw IllegalArgumentException("path is blank")

@@ -10,8 +10,8 @@ import datapipe.core.data.model.metadata.parser.MetadataPropertyNode
 class RemovePropertiesByNameVisitor(private val names: Set<String>): MetadataAstNodeVisitor {
 
     override fun visitMetadataClassNode(node: MetadataClassNode) {
-        node.children.removeIf { propertyNode ->
-            (propertyNode as MetadataPropertyNode).names.any { it.name in names }
+        node.properties.removeIf { propertyNode ->
+            propertyNode.names.any { it.name in names }
         }
     }
 
