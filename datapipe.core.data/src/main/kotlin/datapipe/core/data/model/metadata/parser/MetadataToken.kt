@@ -21,7 +21,11 @@ object ListEnd: MetadataToken()
 
 // ---------------------------------------------------------------------------------
 
-fun buildMetadataAstTree(tokens: Iterable<MetadataToken>): MetadataAstNode {
+fun buildMetadataAstTree(tokens: Sequence<MetadataToken>) = buildMetadataAstTree(tokens.iterator())
+
+fun buildMetadataAstTree(tokens: Iterable<MetadataToken>) = buildMetadataAstTree(tokens.iterator())
+
+fun buildMetadataAstTree(tokens: Iterator<MetadataToken>): MetadataAstNode {
     val root = RootNode()
     var current: MetadataAstNode = root
 

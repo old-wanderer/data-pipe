@@ -29,7 +29,7 @@ sealed class MetadataAstNode(var parent: MetadataAstNode? = null)
 
     fun postOrderIterator(): Iterator<MetadataAstNode> = buildSequence {
         for (child in children) {
-            yieldAll(child.postOrderIterator().asSequence().toList())
+            yieldAll(child.postOrderIterator())
         }
         yield(this@MetadataAstNode)
     }.iterator()
@@ -44,6 +44,7 @@ class RootNode: MetadataAstNode() {
         get() = listOfNotNull(child)
 
     var child: MetadataAstNode? = null
+        // TODO сеттеры дублируются, надо поправить
         set(value) {
             if (field?.parent == this) {
                 field?.parent = null

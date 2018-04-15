@@ -92,7 +92,7 @@ object Pipelines {
             if (param == null) throw RuntimeException("param is null")
 
             return if (param is MetadataClass) {
-                val root = buildMetadataAstTree(tokenize(param).toList())
+                val root = buildMetadataAstTree(tokenize(param))
                 root.rootIterator().forEach { it.visit(visitor) }
                 buildMetadata(root)
             } else {

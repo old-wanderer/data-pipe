@@ -118,7 +118,7 @@ class BuildMetadataFormAstTest {
             })
         }
 
-        Assertions.assertEquals(model, buildMetadata(buildMetadataAstTree(tokenize(model).toList())))
+        Assertions.assertEquals(model, buildMetadata(buildMetadataAstTree(tokenize(model))))
     }
 
 }

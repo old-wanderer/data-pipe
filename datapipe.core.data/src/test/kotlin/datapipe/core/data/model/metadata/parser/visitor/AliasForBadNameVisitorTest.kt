@@ -25,7 +25,7 @@ class AliasForBadNameVisitorTest {
             metadataClass { + "test1" to PrimitiveString } to metadataClass { + "test1" to PrimitiveString }
     ).mapIndexed { index, (input, expected) ->
         DynamicTest.dynamicTest("checkJavaIdentifierTests. Data index: $index") {
-            val root = buildMetadataAstTree(tokenize(input).toList())
+            val root = buildMetadataAstTree(tokenize(input))
             val visitor = AliasForBadNameVisitor()
             root.levelOrderIterator().forEach { it.visit(visitor) }
             val actual = buildMetadata(root)
@@ -43,7 +43,7 @@ class AliasForBadNameVisitorTest {
             metadataClass { + "test1" to PrimitiveString } to metadataClass { + "test1" to PrimitiveString }
     ).mapIndexed { index, (input, expected) ->
         DynamicTest.dynamicTest("checkJavaIdentifierTests. Data index: $index") {
-            val root = buildMetadataAstTree(tokenize(input).toList())
+            val root = buildMetadataAstTree(tokenize(input))
 
             fun isFirstUnderscore(parameter: String) = parameter[0] == '_'
             fun firstUnderscoreProcessor(parameter: String) = parameter.dropWhile { it == '_' }

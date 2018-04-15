@@ -12,7 +12,7 @@ import datapipe.core.data.model.metadata.transformer.operation.MetadataTransform
 class MetadataTransformerBuilder(sourceMetadata: MetadataClass) {
 
     private val operations = mutableListOf<MetadataTransformOperation>()
-    private val root = buildMetadataAstTree(tokenize(sourceMetadata).toList()) as RootNode
+    private val root = buildMetadataAstTree(tokenize(sourceMetadata)) as RootNode
 
     infix fun String.moveTo(destinationPropPath: String) {
         operations.add(MetadataMovePropertyOperation(this, destinationPropPath))
